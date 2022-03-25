@@ -1,3 +1,4 @@
 rootProject.name = 'foodtruck-backend'
 include 'order-service'
+include 'eureka-server'
 

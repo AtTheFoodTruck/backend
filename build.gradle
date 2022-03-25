@@ -26,8 +26,9 @@ buildscript {
     ext {
         spring = "org.springframework"
         boot = "${spring}.boot"
-        bootVersion = "2.6.5"
+        bootVersion = "2.5.10"
         lombok = "org.projectlombok:lombok"
+        set('springCloudVersion', "2021.0.1")
     }
 
     repositories {
