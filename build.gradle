@@ -62,9 +62,18 @@ subprojects {
         compileOnly lombok
         annotationProcessor 'org.projectlombok:lombok'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
-        testImplementation('org.springframework.boot:spring-boot-starter-test') {
-            exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+//        testImplementation('org.springframework.boot:spring-boot-starter-test') {
+//            exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+//        }
+        //JUnit4 추가
+        testImplementation("org.junit.vintage:junit-vintage-engine") {
+            exclude group: "org.hamcrest", module: "hamcrest-core"
         }
     }
+}
 
+project(':module-api') {
+    dependencies {
+        implementation project(':module-common')
+    }
 }
