@@ -1,7 +1,7 @@
-package com.sesac.repository;
+package com.sesac.domain.member.repository;
 
-import com.sesac.entity.Member;
-import com.sesac.repository.MemberRepository;
+import com.sesac.domain.member.entity.Member;
+import com.sesac.domain.member.repository.MemberRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

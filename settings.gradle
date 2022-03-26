@@ -4,4 +4,3 @@ include 'eureka-server'
 include 'apigateway'
 include 'module-common'
 include 'module-api'
-

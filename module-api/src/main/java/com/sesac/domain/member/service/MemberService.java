@@ -1,7 +1,7 @@
-package com.sesac.service;
+package com.sesac.domain.member.service;
 
-import com.sesac.entity.Member;
-import com.sesac.repository.MemberRepository;
+import com.sesac.domain.member.entity.Member;
+import com.sesac.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

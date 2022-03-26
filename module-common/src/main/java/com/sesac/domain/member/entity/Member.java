@@ -1,6 +1,5 @@
-package com.sesac.entity;
+package com.sesac.domain.member.entity;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
