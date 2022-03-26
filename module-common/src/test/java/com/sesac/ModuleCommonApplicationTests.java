@@ -20,6 +20,7 @@ public class ModuleCommonApplicationTests {
         return () -> Optional.of(UUID.randomUUID().toString());
     }
 
+    // spring context load
     public void contextLoads() {
 
     }
