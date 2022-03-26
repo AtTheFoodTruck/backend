@@ -5,8 +5,7 @@ import com.sesac.domain.item.entity.Cart;
 import com.sesac.domain.item.entity.Store;
 import com.sesac.domain.order.entity.Order;
 import com.sesac.domain.order.entity.Review;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -14,14 +13,17 @@ import java.util.List;
 
 import static javax.persistence.FetchType.LAZY;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 @Entity
-@Getter @Setter
 public class Member extends BaseEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
     private Long id;
     private String email;
-    private String name;
+    private String username;
     private String password;
     private String phoneNum;
     private boolean active;
@@ -49,4 +51,19 @@ public class Member extends BaseEntity {
     @OneToOne(fetch = LAZY, cascade = CascadeType.ALL) // member 삭제 시 cart 삭제?
     @JoinColumn(name = "cart_id")
     private Cart cart;
+
+//    @Builder
+//    public Member(String email, String username, String password, String phoneNum, boolean active, Role role, List<Order> orders, Store store, List<Review> reviews, List<Like> likes, Cart cart) {
+//        this.email = email;
+//        this.username = username;
+//        this.password = password;
+//        this.phoneNum = phoneNum;
+//        this.active = active;
+//        this.role = role;
+//        this.orders = orders;
+//        this.store = store;
+//        this.reviews = reviews;
+//        this.likes = likes;
+//        this.cart = cart;
+//    }
 }
