@@ -2,19 +2,14 @@ package com.sesac.service;
 
 import com.sesac.entity.Member;
 import com.sesac.repository.MemberRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-//@RequiredArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class MemberService {
 
-//    private final MemberRepository memberRepository;
-
-    private MemberRepository memberRepository;
-
-    public MemberService(MemberRepository memberRepository) {
-        this.memberRepository = memberRepository;
-    }
+    private final MemberRepository memberRepository;
 
     public Long signup(Member member) {
         return memberRepository.save(member).getId();
