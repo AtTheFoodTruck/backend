@@ -74,6 +74,6 @@ subprojects {
 
 project(':module-api') {
     dependencies {
-        implementation project(':module-common')
+        implementation project(path: ':module-common', configuration: 'default')
     }
 }

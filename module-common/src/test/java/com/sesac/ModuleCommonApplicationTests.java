@@ -1,4 +1,4 @@
-package com.sesac.common;
+package com.sesac;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

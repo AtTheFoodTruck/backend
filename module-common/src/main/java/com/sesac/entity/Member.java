@@ -1,4 +1,4 @@
-package com.sesac.common.entity;
+package com.sesac.entity;
 
 import lombok.Builder;
 import lombok.Getter;
