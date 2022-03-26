@@ -66,13 +66,13 @@ public class JwtGenerator implements Serializable {
     **/
     public String generateAccessToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        List<String> roles = new ArrayList<>();
+        List<String> authorities = new ArrayList<>();
 
         for (GrantedAuthority a: userDetails.getAuthorities()) {
-            roles.add(a.getAuthority());
+            authorities.add(a.getAuthority());
         }
 
-        claims.put("role", roles);
+        claims.put("role", authorities);
         return Jwts.builder().setClaims(claims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
