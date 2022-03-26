@@ -77,3 +77,9 @@ project(':module-api') {
         implementation project(path: ':module-common', configuration: 'default')
     }
 }
+
+project(':apigateway') {
+    dependencies {
+        implementation project(path: ':module-common', configuration: 'default')
+    }
+}
