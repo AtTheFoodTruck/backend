@@ -19,15 +19,17 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 @Slf4j
 @Component
-public class JwtRequestFilter extends AbstractGatewayFilterFactory<JwtRequestFilter.Config> {
+public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilterFactory<JwtAuthenticationGatewayFilterFactory.Config> implements Ordered {
     @Value("${jwt.secret}")
     private String secret;
 
-    public JwtRequestFilter() {
+    @Autowired
+    private JwtGenerator jwtGenerator;
+
+    public JwtAuthenticationGatewayFilterFactory() {
         super(Config.class);
     }
 
@@ -38,6 +40,17 @@ public class JwtRequestFilter extends AbstractGatewayFilterFactory<JwtRequestFil
     }
 
     @Override
+    public int getOrder() {
+        return -2;
+    }
+
+    /**
+     * Jwt token 유효성 체크 filter
+     * @author jjaen
+     * @version 1.0.0
+     * 작성일 2022/03/27
+    **/
+    @Override
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
@@ -47,8 +60,14 @@ public class JwtRequestFilter extends AbstractGatewayFilterFactory<JwtRequestFil
             String token = extractToken(request);  // "Bearer " 이후 String
             log.info("JWT token: " + token);
 
+            // JWT token 이 유효한지 확인
             if (!isJwtValid(token)) {
-                return onError(exchange, "Invalid authorization header", HttpStatus.BAD_REQUEST);
+                return onError(exchange, "Invalid authorization header", HttpStatus.UNAUTHORIZED);
+            }
+
+            // 해당 request 가 허용된 권한이 JWT token 의 user role 을 포함하고 있는지 확인
+            if (! hasRole(config, token)) {
+                return onError(exchange, "Invalid role", HttpStatus.UNAUTHORIZED);
             }
 
             return chain.filter(exchange);
@@ -63,6 +82,12 @@ public class JwtRequestFilter extends AbstractGatewayFilterFactory<JwtRequestFil
         return response.setComplete();
     }
 
+    /**
+     * Jwt token 유효 여부 체크
+     * @author jjaen
+     * @version 1.0.0
+     * 작성일 2022/03/27
+    **/
     private boolean isJwtValid(String token) {
         String subject = null;
         try {
@@ -81,18 +106,55 @@ public class JwtRequestFilter extends AbstractGatewayFilterFactory<JwtRequestFil
             return false;
         }
         if (subject.isEmpty()) {
+            log.warn("The subject is empty");
             return false;
         }
 
         return true;
     }
 
+    /**
+     * header 안 Authentication 포함 여부
+     * @author jjaen
+     * @version 1.0.0
+     * 작성일 2022/03/27
+    **/
     private boolean containsAuthorization(ServerHttpRequest request) {
         return request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION);
     }
 
+    /**
+     * header 에서 token 추출
+     * @author jjaen
+     * @version 1.0.0
+     * 작성일 2022/03/27
+     **/
     private String extractToken(ServerHttpRequest request) {
         return request.getHeaders().getOrEmpty(HttpHeaders.AUTHORIZATION).get(0).substring(7);
     }
 
+    /**
+     * role 체크
+     * - filter 로 들어온 요청에 필요한 role 을 유저가 갖고 있는지
+     * @author jjaen
+     * @version 1.0.0
+     * 작성일 2022/03/27
+    **/
+    private boolean hasRole(Config config, String token) {
+        log.info("hasRole token: " + token);
+        ArrayList<String> authorities = (ArrayList<String>) jwtGenerator.getUserParseInfo(token).get("role");
+        log.info("role of request user: " + authorities);
+
+        if (! authorities.contains(config.getRole())) {
+            return false;
+        }
+        return true;
+    }
+
+//    private void addAuthorizationHeaders(ServerHttpRequest request, TokenUser tokenUser) {
+//        request.mutate()
+//                .header("X-Authorization-Id", tokenUser.getId())
+//                .header("X-Authorization-Role", tokenUser.getRole())
+//                .build();
+//    }
 }
