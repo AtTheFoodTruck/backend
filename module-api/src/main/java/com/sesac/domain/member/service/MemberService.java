@@ -2,6 +2,7 @@ package com.sesac.domain.member.service;
 
 import com.sesac.domain.member.dto.RequestMember;
 import com.sesac.domain.member.entity.Member;
+import com.sesac.domain.member.entity.Role;
 import com.sesac.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,8 @@ public class MemberService {
                 .username(member.getUsername())
                 .password(passwordEncoder.encode(member.getPassword()))
                 .phoneNum(member.getPhoneNum())
+                .active(true)
+                .role(Role.ROLE_USER)
                 .build();
 
         return memberRepository.save(createdMember);
