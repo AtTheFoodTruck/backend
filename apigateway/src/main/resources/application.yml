@@ -13,12 +13,11 @@ spring:
     name: apigateway-service
   cloud:
     gateway:
-      routes:
-        - id: order-service
-          uri: lb://ORDER-SERVICE
-          predicates:
-            - Path=/order-service/**
-
+#      routes:
+#        - id: order-service
+#          uri: lb://ORDER-SERVICE
+#          predicates:
+#            - Path=/order-service/**
 
   # redis 설정
   redis:
@@ -34,4 +33,8 @@ spring:
 jwt.secret:
     foodtruck
 
-
+# gw process 추적
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty.http.client: DEBUG

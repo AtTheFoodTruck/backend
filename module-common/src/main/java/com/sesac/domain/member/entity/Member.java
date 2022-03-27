@@ -23,7 +23,7 @@ public class Member extends BaseEntity {
     @Column(name = "member_id")
     private Long id;
     private String email;
-    private String username;
+    private String username; //nickname
     private String password;
     private String phoneNum;
     private boolean active;
