@@ -58,41 +58,6 @@ public class JwtTokenProvider implements Serializable {
     }
 
     /**
-     * Access Token 생성
-     * @param authentication
-     * @author jjaen
-     * @version 1.0.0
-     * 작성일 2022/03/27
-    **/
-    public String generateAccessToken(Authentication authentication) {
-        String authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
-
-        return Jwts.builder()
-                .claim(AUTHORITIES_KEY, authorities)  // authorities
-                .setSubject(authentication.getName())  // email
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + JWT_ACCESS_TOKEN_VALIDITY * 1000))
-                .signWith(key, SignatureAlgorithm.HS512).compact();
-    }
-
-    /**
-     * Refresh Token 생성
-     * @param authentication
-     * @author jjaen
-     * @version 1.0.0
-     * 작성일 2022/03/27
-     **/
-    public String generateRefreshToken(Authentication authentication) {
-        return Jwts.builder()
-                .setSubject(authentication.getName())  // email
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + JWT_REFRESH_TOKEN_VALIDITY * 1000))
-                .signWith(key, SignatureAlgorithm.HS512).compact();
-    }
-
-    /**
      * access token 에 담겨있는 권한 정보들(claims)을 이용해 Authentication 객체 리턴
      * @author jjaen
      * @version 1.0.0
@@ -118,17 +83,22 @@ public class JwtTokenProvider implements Serializable {
      * 작성일 2022-03-27
     **/
     // Authentication 객체의 권한 정보를 이용해서 토큰을 생성
-    public String createToken(Authentication authentication) {
+    public String createToken(Authentication authentication, boolean isRefreshToken) {
         String authorities = authentication.getAuthorities().stream()
-                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
-        long now = (new Date()).getTime();
-        Date validity = new Date(now + JWT_ACCESS_TOKEN_VALIDITY); //yml에 정의한 token 만료시간
+        long now = System.currentTimeMillis();
+        Date validity = null;
+        if (isRefreshToken) {
+            validity = new Date(now + JWT_ACCESS_TOKEN_VALIDITY * 1000);
+        } else {
+            validity = new Date(now + JWT_REFRESH_TOKEN_VALIDITY * 1000);
+        }
 
         return Jwts.builder()
-                .setSubject(authentication.getName())
-                .claim(AUTHORITIES_KEY, authorities)
+                .setSubject(authentication.getName())  // email
+                .claim(AUTHORITIES_KEY, authorities)  // authorities
                 .signWith(key, SignatureAlgorithm.HS512)
                 .setExpiration(validity)
                 .compact();

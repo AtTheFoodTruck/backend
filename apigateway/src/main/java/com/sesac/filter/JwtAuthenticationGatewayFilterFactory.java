@@ -101,7 +101,7 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
     private boolean isJwtValid(String token) {
         String subject = null;
         try {
-            subject = jwtTokenProvider.getUsernameFromToken(token);
+//            subject = jwtTokenProvider.getUsernameFromToken(token);
         } catch (NullPointerException e) {
             log.warn("NullPointerException");
             return false;

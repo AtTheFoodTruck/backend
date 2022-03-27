@@ -7,6 +7,8 @@ import com.sesac.domain.user.dto.ResponseUser;
 import com.sesac.domain.user.entity.User;
 import com.sesac.domain.user.service.UserService;
 import com.sesac.jwt.JwtTokenProvider;
+import com.sesac.redis.RedisService;
+import com.sesac.redis.RedisToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -29,6 +31,7 @@ public class UserController {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserService userService;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final RedisService redisService;
 
     /**
      * 개인 회원가입
@@ -72,13 +75,20 @@ public class UserController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         // 생성된 객체로 TokenProvider.createToken 메서드를 통해 jwt토큰을 생성
-        String jwt = jwtTokenProvider.createToken(authentication);
+//        String jwt = jwtTokenProvider.createToken(authentication);
+        String accessToken = jwtTokenProvider.createToken(authentication, false);
+        String refreshToken = jwtTokenProvider.createToken(authentication, true);
+
+        // redis 에 저장
+        redisService.setRefreshToken(new RedisToken(requestUser.getEmail(), refreshToken));
 
         HttpHeaders httpHeaders = new HttpHeaders();
         // Header에 추가
-        httpHeaders.add("Authorization", "Bearer " + jwt);
+        httpHeaders.add("Authorization", "Bearer " + accessToken);
 
         // jwt토큰 return                           body            header          status
-        return new ResponseEntity<>(new TokenDto(jwt), httpHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(new TokenDto(accessToken), httpHeaders, HttpStatus.OK);
     }
+
+
 }
