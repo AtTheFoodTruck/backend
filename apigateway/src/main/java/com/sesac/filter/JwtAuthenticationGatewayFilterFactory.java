@@ -1,6 +1,7 @@
-package com.sesac.jwt;
+package com.sesac.filter;
 
 
+import com.sesac.jwt.JwtGenerator;
 import io.jsonwebtoken.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -21,8 +23,9 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 
 @Slf4j
+@Order(-2)
 @Component
-public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilterFactory<JwtAuthenticationGatewayFilterFactory.Config> implements Ordered {
+public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilterFactory<JwtAuthenticationGatewayFilterFactory.Config> {
     @Value("${jwt.secret}")
     private String secret;
 
@@ -39,13 +42,8 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
         private String role;
     }
 
-    @Override
-    public int getOrder() {
-        return -2;
-    }
-
     /**
-     * Jwt token 유효성 체크 filter
+     * Jwt token 인증 filter
      * @author jjaen
      * @version 1.0.0
      * 작성일 2022/03/27
@@ -54,15 +52,18 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
+
+            // request header 에 Authorization 가 없는 경우
             if (!containsAuthorization(request)) {
-                return onError(exchange, "No authorization header", HttpStatus.BAD_REQUEST);
+                return onError(exchange, "No Authorization header", HttpStatus.BAD_REQUEST);
             }
+
             String token = extractToken(request);  // "Bearer " 이후 String
             log.info("JWT token: " + token);
 
             // JWT token 이 유효한지 확인
             if (!isJwtValid(token)) {
-                return onError(exchange, "Invalid authorization header", HttpStatus.UNAUTHORIZED);
+                return onError(exchange, "Invalid Authorization header", HttpStatus.UNAUTHORIZED);
             }
 
             // 해당 request 가 허용된 권한이 JWT token 의 user role 을 포함하고 있는지 확인
@@ -70,10 +71,17 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
                 return onError(exchange, "Invalid role", HttpStatus.UNAUTHORIZED);
             }
 
+            // jwt token 인증 성공
             return chain.filter(exchange);
         };
     }
 
+    /**
+     * response 에 error status 추가
+     * @author jjaen
+     * @version 1.0.0
+     * 작성일 2022/03/27
+    **/
     private Mono<Void> onError(ServerWebExchange exchange, String err, HttpStatus httpStatus) {
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(httpStatus);
@@ -83,7 +91,7 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
     }
 
     /**
-     * Jwt token 유효 여부 체크
+     * Jwt token 유효성 여부
      * @author jjaen
      * @version 1.0.0
      * 작성일 2022/03/27
@@ -91,16 +99,14 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
     private boolean isJwtValid(String token) {
         String subject = null;
         try {
-            subject = Jwts.parser().setSigningKey(secret)
-                    .parseClaimsJws(token).getBody()
-                    .getSubject();
+            subject = jwtGenerator.getUsernameFromToken(token);
         } catch (NullPointerException e) {
             log.warn("NullPointerException");
             return false;
-        } catch (SignatureException | ExpiredJwtException e) {
+        } catch (SignatureException | ExpiredJwtException e) {  // token is expired
             log.warn("Signature of the token is wrong or Token is expired");
             return false;
-        } // token is expired
+        }
         catch (MalformedJwtException | UnsupportedJwtException | IllegalArgumentException e) {  // format is wrong
             log.warn("The token is wrong format");
             return false;
@@ -124,7 +130,7 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
     }
 
     /**
-     * header 에서 token 추출
+     * header 의 Authentication 에서 token 추출
      * @author jjaen
      * @version 1.0.0
      * 작성일 2022/03/27
@@ -135,7 +141,9 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
 
     /**
      * role 체크
-     * - filter 로 들어온 요청에 필요한 role 을 유저가 갖고 있는지
+     * - filter 로 들어온 request 에 필요한 role 을 유저가 갖고 있는지
+     * @param config: 해당 request 에 필요한 role
+     * @param token: jwt access token
      * @author jjaen
      * @version 1.0.0
      * 작성일 2022/03/27
