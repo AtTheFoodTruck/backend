@@ -1,4 +1,4 @@
-package com.sesac.domain.member.entity;
+package com.sesac.domain.user.entity;
 
 import com.sesac.domain.common.BaseEntity;
 import com.sesac.domain.item.entity.Store;
@@ -18,10 +18,10 @@ public class Like extends BaseEntity {
     @Column(name = "like_id")
     private Long id;
 
-    // Member
+    // User
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "user_id")
+    private User User;
 
     // Store
     @ManyToOne(fetch = LAZY)

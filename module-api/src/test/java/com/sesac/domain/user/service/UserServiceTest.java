@@ -1,7 +1,7 @@
-package com.sesac.domain.member.service;
+package com.sesac.domain.user.service;
 
-import com.sesac.domain.member.dto.RequestMember;
-import com.sesac.domain.member.entity.Member;
+import com.sesac.domain.user.dto.RequestUser;
+import com.sesac.domain.user.entity.User;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,16 +13,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class MemberServiceTest {
+public class UserServiceTest {
 
-    @Autowired private MemberService memberService;
+    @Autowired private UserService userService;
     @Autowired private BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
     @Test
     public void 회원가입() {
         //given
-        RequestMember member = RequestMember.builder()
+        RequestUser member = RequestUser.builder()
                 .email("jaemin@naver.com")
                 .username("jaemin")
                 .password(passwordEncoder.encode("kadslfjiew"))
@@ -31,11 +31,11 @@ public class MemberServiceTest {
 
         System.out.println("member.getClass() = " + member.getClass());
         //when
-        Member savedMember = memberService.join(member);
-        System.out.println("savedMember.getClass() = " + savedMember.getClass());
+        User savedUser = userService.join(member);
+        System.out.println("savedMember.getClass() = " + savedUser.getClass());
         
         //then
-        Assertions.assertThat(savedMember.getUsername()).isEqualTo("jaemin");
+        Assertions.assertThat(savedUser.getUsername()).isEqualTo("jaemin");
         
     }
 }

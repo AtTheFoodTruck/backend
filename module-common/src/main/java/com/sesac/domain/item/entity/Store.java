@@ -1,8 +1,8 @@
 package com.sesac.domain.item.entity;
 
 import com.sesac.domain.common.BaseEntity;
-import com.sesac.domain.member.entity.Like;
-import com.sesac.domain.member.entity.Member;
+import com.sesac.domain.user.entity.Like;
+import com.sesac.domain.user.entity.Member;
 import com.sesac.domain.order.entity.Image;
 import com.sesac.domain.order.entity.Review;
 import lombok.Getter;

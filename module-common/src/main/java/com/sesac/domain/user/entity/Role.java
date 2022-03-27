@@ -1,4 +1,4 @@
-package com.sesac.domain.member.entity;
+package com.sesac.domain.user.entity;
 
 public enum Role {
     ROLE_USER,
