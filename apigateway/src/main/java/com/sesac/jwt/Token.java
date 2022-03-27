@@ -13,6 +13,7 @@ import java.io.Serializable;
 @RedisHash
 public class Token implements Serializable {
     private static final long serialVersionUID = -7353484588260422449L;
+    private String email;
     private String username;
     private String refreshToken;
 }

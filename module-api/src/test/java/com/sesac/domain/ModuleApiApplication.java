@@ -1,4 +1,4 @@
-package com.sesac;
+package com.sesac.domain;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,5 +12,8 @@ public class ModuleApiApplication {
         SpringApplication.run(ModuleApiApplication.class, args);
     }
 
-
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }

@@ -1,9 +1,9 @@
 package com.sesac.domain.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sesac.domain.member.dto.MemberDto;
-import com.sesac.domain.member.dto.RequestMember;
-import com.sesac.domain.member.service.MemberService;
+import com.sesac.domain.user.dto.MemberDto;
+import com.sesac.domain.user.dto.RequestUser;
+import com.sesac.domain.user.service.UserService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ import java.util.Date;
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
-    private final MemberService memberService;
+    private final UserService userService;
     private final Environment env;
 
     /**
@@ -42,7 +42,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     public Authentication attemptAuthentication(HttpServletRequest request,
                                                 HttpServletResponse response) throws AuthenticationException {
         try {
-            RequestMember creds = new ObjectMapper().readValue(request.getInputStream(), RequestMember.class);
+            RequestUser creds = new ObjectMapper().readValue(request.getInputStream(), RequestUser.class);
 
             // token을 인증 처리
             return getAuthenticationManager().authenticate(
@@ -74,7 +74,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         String userName= ((User) authResult.getPrincipal()).getUsername();
         //token 생성하기 이전에 userId로 토큰을 생성할 예정, DB에서 userDto를 갖고와서 token 생성
 
-        MemberDto memberDetails = memberService.getMemberDetailsByEmail(userName);
+        MemberDto memberDetails = userService.getMemberDetailsByEmail(userName);
         String token = Jwts.builder()
                 .setSubject(String.valueOf(memberDetails.getId()))
                 .setExpiration(new Date(System.currentTimeMillis() +

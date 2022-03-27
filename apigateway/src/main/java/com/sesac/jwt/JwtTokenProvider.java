@@ -110,4 +110,27 @@ public class JwtTokenProvider implements Serializable {
 
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
+
+    /**
+     * AccessToken 생성
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-27
+    **/
+    // Authentication 객체의 권한 정보를 이용해서 토큰을 생성
+    public String createToken(Authentication authentication) {
+        String authorities = authentication.getAuthorities().stream()
+                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .collect(Collectors.joining(","));
+
+        long now = (new Date()).getTime();
+        Date validity = new Date(now + JWT_ACCESS_TOKEN_VALIDITY); //yml에 정의한 token 만료시간
+
+        return Jwts.builder()
+                .setSubject(authentication.getName())
+                .claim(AUTHORITIES_KEY, authorities)
+                .signWith(key, SignatureAlgorithm.HS512)
+                .setExpiration(validity)
+                .compact();
+    }
 }

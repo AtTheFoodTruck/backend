@@ -1,6 +1,6 @@
 package com.sesac.domain.security;
 
-import com.sesac.domain.member.service.MemberService;
+import com.sesac.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -10,14 +10,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import javax.servlet.Filter;
-
 @RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
 
-    private final MemberService memberService;
+    private final UserService userService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final Environment env;
 
@@ -47,7 +45,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     **/
     private AuthenticationFilter getAuthenticationFilter() throws Exception {
         AuthenticationFilter authenticationFilter
-                = new AuthenticationFilter(authenticationManager(), memberService, env);
+                = new AuthenticationFilter(authenticationManager(), userService, env);
         // 인증 매니저 등록
         authenticationFilter.setAuthenticationManager(authenticationManager());
 
@@ -64,6 +62,6 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         // 사용자의 email, password로 로그인처리
-        auth.userDetailsService(memberService).passwordEncoder(bCryptPasswordEncoder);
+        auth.userDetailsService(userService).passwordEncoder(bCryptPasswordEncoder);
     }
 }
