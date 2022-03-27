@@ -90,6 +90,8 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
         return response.setComplete();
     }
 
+
+    //TODO 유효성 검증 로직 수정
     /**
      * Jwt token 유효성 여부
      * @author jjaen

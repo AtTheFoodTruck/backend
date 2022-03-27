@@ -59,7 +59,7 @@ public class JwtTokenProvider implements Serializable {
      * 작성일 2022/03/27
     **/
     public String getUsernameFromToken(String accessToken) {
-        return getClaimFromToken(accessToken, Claims::getSubject);
+        return getClaimFromToken(accessToken, claims -> claims.getSubject());
     }
 
     /**

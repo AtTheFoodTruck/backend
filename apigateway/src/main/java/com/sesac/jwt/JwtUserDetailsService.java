@@ -17,6 +17,7 @@ public class JwtUserDetailsService implements UserDetailsService {
     private final MemberRepository memberRepository;
 
 
+    // TODO 유효성 검증 로직 수정    
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Member member = memberRepository.findByUsername(username).orElseThrow(
