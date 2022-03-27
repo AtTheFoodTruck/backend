@@ -32,7 +32,7 @@ public class LoggingGatewayFilterFactory extends AbstractGatewayFilterFactory<Lo
                     log.info("Logging POST Filter: response code -> {}", response.getStatusCode());
                 }
             }));
-        }, Ordered.LOWEST_PRECEDENCE);
+        }, Ordered.LOWEST_PRECEDENCE);  // Custom Filter 중 가장 낮은 순서
 
         return filter;
     }
