@@ -1,17 +1,17 @@
-package com.sesac.domain.member.dto;
+package com.sesac.domain.user.dto;
 
-import com.sesac.domain.member.entity.Member;
+import com.sesac.domain.user.entity.User;
 import lombok.Data;
 
 @Data
-public class ResponseMember {
+public class ResponseUser {
 
     private String username;
     private String email;
     private String phoneNum;
 
     // Entity -> Dto
-    public ResponseMember(Member joinMember) {
+    public ResponseUser(User joinMember) {
         this.username = joinMember.getUsername();
         this.email = joinMember.getEmail();
         this.phoneNum = joinMember.getPhoneNum();

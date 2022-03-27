@@ -7,20 +7,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
+import java.security.Key;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider implements Serializable {
+    private static final String AUTHORITIES_KEY = "auth";
     private static final long serialVersionUID = -2550185165626007488L;
-    private static final String REFRESH_TOKEN_KEY = "RF";
     private static final long JWT_ACCESS_TOKEN_VALIDITY = 60 * 30; // 30 minutes
     private static final long JWT_REFRESH_TOKEN_VALIDITY = 60 * 60 * 24 * 7; // 1 week
+
+    private Key key;
 
     @Value("${jwt.secret}")
     private String secret;
@@ -35,6 +40,7 @@ public class JwtTokenProvider implements Serializable {
      * 작성일 2022/03/27
      **/
     private Claims getAllClaimsFromToken(String token) {
+        //TODO 토큰 값 추출하는 것 수정, secret 대신 Key로 jwt토큰 생성 및 추출로 수정
         return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
     }
 
@@ -70,9 +76,10 @@ public class JwtTokenProvider implements Serializable {
      * 작성일 2022/03/27
     **/
     public Map<String, Object> getUserParseInfo(String accessToken) {
-        Claims parseInfo = getAllClaimsFromToken(accessToken);
         Map<String, Object> result = new HashMap<>();
-        result.put("username", parseInfo.getSubject());
+
+        Claims parseInfo = getAllClaimsFromToken(accessToken);
+        result.put("email", parseInfo.getSubject());
         result.put("role", parseInfo.get("role", List.class));
 
         return result;
@@ -96,21 +103,21 @@ public class JwtTokenProvider implements Serializable {
      * @version 1.0.0
      * 작성일 2022/03/27
     **/
-    public String generateAccessToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        List<String> authorities = new ArrayList<>();
-
-        for (GrantedAuthority a: userDetails.getAuthorities()) {
-            authorities.add(a.getAuthority());
-        }
-
-        claims.put("role", authorities);
-        return Jwts.builder().setClaims(claims)
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + JWT_ACCESS_TOKEN_VALIDITY * 1000))
-                .signWith(SignatureAlgorithm.HS512, secret).compact();
-    }
+//    public String generateAccessToken(UserDetails userDetails) {
+//        Map<String, Object> claims = new HashMap<>();
+//        List<String> authorities = new ArrayList<>();
+//
+//        for (GrantedAuthority a: userDetails.getAuthorities()) {
+//            authorities.add(a.getAuthority());
+//        }
+//
+//        claims.put("role", authorities);
+//        return Jwts.builder().setClaims(claims)
+//                .setSubject(userDetails.get)
+//                .setIssuedAt(new Date(System.currentTimeMillis()))
+//                .setExpiration(new Date(System.currentTimeMillis() + JWT_ACCESS_TOKEN_VALIDITY * 1000))
+//                .signWith(SignatureAlgorithm.HS512, secret).compact();
+//    }
 
     /**
      * Refresh Token 생성
@@ -133,7 +140,30 @@ public class JwtTokenProvider implements Serializable {
      * 작성일 2022/03/27
      **/
     private void saveRefreshToken(Token token) {
-        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-        valueOperations.set(token.getUsername(), token.getRefreshToken());
+        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        valueOperations.set(token.getEmail(), token);
+    }
+
+    /**
+     * AccessToken 생성
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-27
+    **/
+    // Authentication 객체의 권한 정보를 이용해서 토큰을 생성
+    public String createToken(Authentication authentication) {
+        String authorities = authentication.getAuthorities().stream()
+                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .collect(Collectors.joining(","));
+
+        long now = (new Date()).getTime();
+        Date validity = new Date(now + JWT_ACCESS_TOKEN_VALIDITY); //yml에 정의한 token 만료시간
+
+        return Jwts.builder()
+                .setSubject(authentication.getName())
+                .claim(AUTHORITIES_KEY, authorities)
+                .signWith(key, SignatureAlgorithm.HS512)
+                .setExpiration(validity)
+                .compact();
     }
 }

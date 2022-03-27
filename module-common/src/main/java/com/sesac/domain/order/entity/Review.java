@@ -2,14 +2,11 @@ package com.sesac.domain.order.entity;
 
 import com.sesac.domain.common.BaseEntity;
 import com.sesac.domain.item.entity.Store;
-import com.sesac.domain.member.entity.Member;
+import com.sesac.domain.user.entity.Member;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static javax.persistence.FetchType.LAZY;
 

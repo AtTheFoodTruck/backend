@@ -1,11 +1,8 @@
-package com.sesac.domain.member.dto;
+package com.sesac.domain.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-
-import java.util.Date;
-import java.util.List;
 
 @Builder
 @AllArgsConstructor

@@ -1,7 +1,7 @@
 package com.sesac.domain.order.entity;
 
 import com.sesac.domain.common.BaseEntity;
-import com.sesac.domain.member.entity.Member;
+import com.sesac.domain.user.entity.Member;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

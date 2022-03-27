@@ -1,4 +1,4 @@
-package com.sesac.domain.member.dto;
+package com.sesac.domain.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 @Builder
 @AllArgsConstructor
 @Data
-public class RequestMember {
+public class RequestUser {
 
     @NotNull(message = "이메일 정보는 필수입니다.")
     @Email

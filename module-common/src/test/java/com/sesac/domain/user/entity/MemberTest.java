@@ -1,6 +1,6 @@
-package com.sesac.domain.member.entity;
+package com.sesac.domain.user.entity;
 
-import com.sesac.domain.member.repository.MemberRepository;
+import com.sesac.domain.user.repository.MemberRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-
-import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @Transactional
