@@ -15,32 +15,56 @@ import java.util.function.Function;
 @Component
 public class JwtGenerator implements Serializable {
     private static final long serialVersionUID = -2550185165626007488L;
-    public static final long JWT_ACCESS_TOKEN_VALIDITY = 15 * 60; //10
-    public static final long JWT_REFRESH_TOKEN_VALIDITY = 24 * 60 * 60 * 7; //일주일
+    public static final long JWT_ACCESS_TOKEN_VALIDITY = 60 * 30; // 30 minutes
+    public static final long JWT_REFRESH_TOKEN_VALIDITY = 60 * 60 * 24 * 7; // 1 week
+
     @Value("${jwt.secret}")
     private String secret;
 
-//    public String getUsernameFromToken(String token) {
-//        return getClaimFromToken(token, Claims::getSubject);
-//    }
-
-    private <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = getAllClaimsFromToken(token);
-        return claimsResolver.apply(claims);
-    }
-
+    /**
+     * token 의 모든 claim 반환
+     * @param token: jwt token
+     * @author jjaen
+     * @version 1.0.0
+     * 작성일 2022/03/27
+     **/
     private Claims getAllClaimsFromToken(String token) {
         return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
     }
 
     /**
-     * token 으로부터 username, role 추출
+     * token 에서 원하는 claim 반환
+     * @param token: jwt token
+     * @param claimsResolver: token 에서 얻고자하는 claim method
      * @author jjaen
      * @version 1.0.0
      * 작성일 2022/03/27
     **/
-    public Map<String, Object> getUserParseInfo(String token) {
-        Claims parseInfo = getAllClaimsFromToken(token);
+    private <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = getAllClaimsFromToken(token);
+        return claimsResolver.apply(claims);
+    }
+
+    /**
+     * token 에서 username 반환
+     * @param accessToken: jwt access token
+     * @author jjaen
+     * @version 1.0.0
+     * 작성일 2022/03/27
+    **/
+    public String getUsernameFromToken(String accessToken) {
+        return getClaimFromToken(accessToken, Claims::getSubject);
+    }
+
+    /**
+     * token 으로부터 username, role map 반환
+     * @param accessToken: jwt access token
+     * @author jjaen
+     * @version 1.0.0
+     * 작성일 2022/03/27
+    **/
+    public Map<String, Object> getUserParseInfo(String accessToken) {
+        Claims parseInfo = getAllClaimsFromToken(accessToken);
         Map<String, Object> result = new HashMap<>();
         result.put("username", parseInfo.getSubject());
         result.put("role", parseInfo.get("role", List.class));
@@ -49,7 +73,8 @@ public class JwtGenerator implements Serializable {
     }
 
     /**
-     * token 만료 여부 체크
+     * token 만료 여부
+     * @param token: jwt token
      * @author jjaen
      * @version 1.0.0
      * 작성일 2022/03/27
@@ -60,6 +85,7 @@ public class JwtGenerator implements Serializable {
 
     /**
      * Access Token 생성
+     * @param userDetails
      * @author jjaen
      * @version 1.0.0
      * 작성일 2022/03/27
@@ -82,6 +108,7 @@ public class JwtGenerator implements Serializable {
 
     /**
      * Refresh Token 생성
+     * @param username
      * @author jjaen
      * @version 1.0.0
      * 작성일 2022/03/27
