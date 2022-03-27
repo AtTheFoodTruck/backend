@@ -13,12 +13,6 @@ spring:
     name: apigateway-service
   cloud:
     gateway:
-      default-filters: # 공통 필터
-        - name: LoggingGatewayFilterFactory
-          args:
-            baseMessage: LoggingGatewayFilterFactory
-            preLogger: true
-            postLogger: true
 #      routes:
 #        - id: order-service
 #          uri: lb://ORDER-SERVICE
