@@ -59,5 +59,5 @@ public class User extends BaseEntity {
             name = "user_authority",
             joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "authority_name", referencedColumnName = "authority_name")})
-    private List<Authority> authorities = new ArrayList<>();
+    private Set<Authority> authorities;
 }

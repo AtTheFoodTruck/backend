@@ -31,7 +31,7 @@ public class UserController {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
     /**
-     * 개인 회원가입
+     * 개인 회원 회원가입
      * @author jaemin
      * @version 1.0.0
      * 작성일 2022-03-26
@@ -44,7 +44,12 @@ public class UserController {
         }
 
         User joinUser = userService.join(member);
-        ResponseUser responseUser = new ResponseUser(joinUser);
+
+        ResponseUser responseUser = ResponseUser.builder()
+                .username(joinUser.getUsername())
+                .email(joinUser.getEmail())
+                .phoneNum(joinUser.getPhoneNum())
+                .build();
 
         return new ResponseDto(HttpStatus.CREATED.value(), responseUser);
     }
@@ -56,7 +61,7 @@ public class UserController {
      * 작성일 2022-03-27
     **/
     // 로그인
-    @PostMapping("/login")
+    @PostMapping("/users/login")
     public ResponseEntity<TokenDto> authorize(@Valid @RequestBody RequestUser requestUser, BindingResult result) {
 
         if (result.hasErrors()) {

@@ -1,6 +1,7 @@
 package com.sesac.domain.user.service;
 
 import com.sesac.domain.user.dto.RequestUser;
+import com.sesac.domain.user.entity.Authority;
 import com.sesac.domain.user.entity.User;
 import com.sesac.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -18,21 +21,31 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * 개인 회원 회원가입
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-28
+    **/
     @Transactional
-    public User join(RequestUser member) {
-        if (userRepository.findByUsername(member.getUsername()).orElse(null) != null) {
+    public User join(RequestUser user) {
+        if (userRepository.findByUsername(user.getUsername()).orElse(null) != null) {
             throw new RuntimeException("이미 가입되어 있는 유저입니다.");
         }
-        
-        //TODO 유저권한을 제외하고 저장
-        User createdMember = User.builder()
-                .email(member.getEmail())
-                .username(member.getUsername())
-                .password(passwordEncoder.encode(member.getPassword()))
-                .phoneNum(member.getPhoneNum())
+
+        // param으로 받은 user로 권한정보 생성, 가입은 USER로만
+        Authority authority = Authority.builder()
+                .authorityName("ROLE_USER")
+                .build();
+
+        User createdUser = User.builder()
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .password(passwordEncoder.encode(user.getPassword()))
+                .authorities(Collections.singleton(authority))
                 .activated(true)
                 .build();
 
-        return userRepository.save(createdMember);
+        return userRepository.save(createdUser);
     }
 }

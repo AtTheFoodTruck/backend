@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.security.Key;
 import java.util.ArrayList;
 
 @Slf4j
@@ -31,6 +32,7 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
+    private Key key;
 
     public JwtAuthenticationGatewayFilterFactory() {
         super(Config.class);
@@ -62,7 +64,7 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
             log.info("JWT token: " + token);
 
             // JWT token 이 유효한지 확인
-            if (!isJwtValid(token)) {
+            if (!validateToken(token)) {
                 return onError(exchange, "Invalid Authorization header", HttpStatus.UNAUTHORIZED);
             }
 
@@ -91,34 +93,28 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
     }
 
 
-    //TODO 유효성 검증 로직 수정
     /**
      * Jwt token 유효성 여부
      * @author jjaen
+     * @modifier jaemin, validation 메서드 수정
      * @version 1.0.0
      * 작성일 2022/03/27
+     * 수정일 2022/03/28
     **/
-    private boolean isJwtValid(String token) {
-        String subject = null;
+    public boolean validateToken(String token) {
         try {
-            subject = jwtTokenProvider.getUsernameFromToken(token);
-        } catch (NullPointerException e) {
-            log.warn("NullPointerException");
-            return false;
-        } catch (SignatureException | ExpiredJwtException e) {  // token is expired
-            log.warn("Signature of the token is wrong or Token is expired");
-            return false;
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return true;
+        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+            log.info("잘못된 JWT 서명입니다.");
+        } catch (ExpiredJwtException e) {
+            log.info("만료된 JWT 토큰입니다.");
+        } catch (UnsupportedJwtException e) {
+            log.info("지원되지 않는 JWT 토큰입니다.");
+        } catch (IllegalArgumentException e) {
+            log.info("JWT 토큰이 잘못되었습니다.");
         }
-        catch (MalformedJwtException | UnsupportedJwtException | IllegalArgumentException e) {  // format is wrong
-            log.warn("The token is wrong format");
-            return false;
-        }
-        if (subject.isEmpty()) {
-            log.warn("The subject is empty");
-            return false;
-        }
-
-        return true;
+        return false;
     }
 
     /**
@@ -160,11 +156,4 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
         }
         return true;
     }
-
-//    private void addAuthorizationHeaders(ServerHttpRequest request, TokenUser tokenUser) {
-//        request.mutate()
-//                .header("X-Authorization-Id", tokenUser.getId())
-//                .header("X-Authorization-Role", tokenUser.getRole())
-//                .build();
-//    }
 }
