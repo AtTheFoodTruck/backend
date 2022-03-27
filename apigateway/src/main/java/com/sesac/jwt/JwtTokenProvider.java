@@ -3,7 +3,10 @@ package com.sesac.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -13,13 +16,16 @@ import java.util.*;
 import java.util.function.Function;
 
 @Component
-public class JwtGenerator implements Serializable {
+public class JwtTokenProvider implements Serializable {
     private static final long serialVersionUID = -2550185165626007488L;
-    public static final long JWT_ACCESS_TOKEN_VALIDITY = 60 * 30; // 30 minutes
-    public static final long JWT_REFRESH_TOKEN_VALIDITY = 60 * 60 * 24 * 7; // 1 week
+    private static final String REFRESH_TOKEN_KEY = "RF";
+    private static final long JWT_ACCESS_TOKEN_VALIDITY = 60 * 30; // 30 minutes
+    private static final long JWT_REFRESH_TOKEN_VALIDITY = 60 * 60 * 24 * 7; // 1 week
 
     @Value("${jwt.secret}")
     private String secret;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * token 의 모든 claim 반환
@@ -118,5 +124,16 @@ public class JwtGenerator implements Serializable {
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_REFRESH_TOKEN_VALIDITY * 1000))
                 .signWith(SignatureAlgorithm.HS512, secret).compact();
+    }
+    /**
+     * Redis 에 Refresh Token 저장
+     * @param token: username(key), refreshToken(value)
+     * @author jjaen
+     * @version 1.0.0
+     * 작성일 2022/03/27
+     **/
+    private void saveRefreshToken(Token token) {
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        valueOperations.set(token.getUsername(), token.getRefreshToken());
     }
 }

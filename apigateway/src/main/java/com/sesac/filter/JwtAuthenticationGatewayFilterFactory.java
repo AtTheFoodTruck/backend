@@ -1,7 +1,7 @@
 package com.sesac.filter;
 
 
-import com.sesac.jwt.JwtGenerator;
+import com.sesac.jwt.JwtTokenProvider;
 import io.jsonwebtoken.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,8 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -30,7 +30,7 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
     private String secret;
 
     @Autowired
-    private JwtGenerator jwtGenerator;
+    private JwtTokenProvider jwtTokenProvider;
 
     public JwtAuthenticationGatewayFilterFactory() {
         super(Config.class);
@@ -99,7 +99,7 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
     private boolean isJwtValid(String token) {
         String subject = null;
         try {
-            subject = jwtGenerator.getUsernameFromToken(token);
+            subject = jwtTokenProvider.getUsernameFromToken(token);
         } catch (NullPointerException e) {
             log.warn("NullPointerException");
             return false;
@@ -150,7 +150,7 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
     **/
     private boolean hasRole(Config config, String token) {
         log.info("hasRole token: " + token);
-        ArrayList<String> authorities = (ArrayList<String>) jwtGenerator.getUserParseInfo(token).get("role");
+        ArrayList<String> authorities = (ArrayList<String>) jwtTokenProvider.getUserParseInfo(token).get("role");
         log.info("role of request user: " + authorities);
 
         if (! authorities.contains(config.getRole())) {
