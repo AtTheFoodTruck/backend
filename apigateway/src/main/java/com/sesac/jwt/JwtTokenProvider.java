@@ -1,8 +1,7 @@
 package com.sesac.jwt;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,6 +14,7 @@ import java.security.Key;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 public class JwtTokenProvider implements Serializable {
     private static final long serialVersionUID = -2550185165626007488L;
@@ -103,4 +103,28 @@ public class JwtTokenProvider implements Serializable {
                 .setExpiration(validity)
                 .compact();
     }
+    /**
+     * Jwt token 유효성 여부
+     * @author jjaen
+     * @modifier jaemin, validation 메서드 수정
+     * @version 1.0.0
+     * 작성일 2022/03/27
+     * 수정일 2022/03/28
+     **/
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return true;
+        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+            log.info("잘못된 JWT 서명입니다.");
+        } catch (ExpiredJwtException e) {
+            log.info("만료된 JWT 토큰입니다.");
+        } catch (UnsupportedJwtException e) {
+            log.info("지원되지 않는 JWT 토큰입니다.");
+        } catch (IllegalArgumentException e) {
+            log.info("JWT 토큰이 잘못되었습니다.");
+        }
+        return false;
+    }
+
 }

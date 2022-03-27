@@ -4,9 +4,10 @@ import lombok.*;
 
 import javax.persistence.*;
 
-@Entity
+@Builder
 @Table(name = "authority")
 @Getter
+@Entity
 public class Authority {
     @Id
     @Column(name = "authority_name", length = 50)

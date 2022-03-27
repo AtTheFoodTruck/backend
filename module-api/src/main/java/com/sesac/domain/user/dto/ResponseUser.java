@@ -1,8 +1,12 @@
 package com.sesac.domain.user.dto;
 
 import com.sesac.domain.user.entity.User;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
+@Builder
+@AllArgsConstructor
 @Data
 public class ResponseUser {
 
