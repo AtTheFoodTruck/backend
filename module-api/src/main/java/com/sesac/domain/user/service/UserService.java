@@ -1,12 +1,12 @@
 package com.sesac.domain.user.service;
 
-import antlr.StringUtils;
+import com.sesac.domain.exception.DuplicateUsernameException;
+import com.sesac.domain.user.dto.RequestManagerDto;
 import com.sesac.domain.user.dto.RequestUserDto;
 import com.sesac.domain.user.dto.UpdateUserDto;
 import com.sesac.domain.user.entity.Authority;
 import com.sesac.domain.user.entity.User;
 import com.sesac.domain.user.repository.UserRepository;
-import io.netty.util.internal.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.Collections;
 
@@ -33,12 +34,15 @@ public class UserService {
      * 작성일 2022-03-28
     **/
     @Transactional
-    public User join(RequestUserDto user) {
+    public User signUpUser(RequestUserDto user) {
+        // 중복회원 검증
+        validateDuplicateUser(user.getEmail());
+
         if (userRepository.findByUsername(user.getUsername()).orElse(null) != null) {
             throw new RuntimeException("이미 가입되어 있는 유저입니다.");
         }
 
-        // param으로 받은 user로 권한정보 생성, 가입은 USER로만
+        // User 권한 생성
         Authority authority = Authority.builder()
                 .authorityName("ROLE_USER")
                 .build();
@@ -54,6 +58,38 @@ public class UserService {
         return userRepository.save(createdUser);
     }
 
+    // TODO 점주에는 가게 정보까지 저장?
+    /**
+     * 점주 회원가입
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-29
+     **/
+    @Transactional
+    public User signUpManager(RequestManagerDto manager) {
+        validateDuplicateUser(manager.getUsername());
+        validateDuplicateEmail(manager.getEmail());
+
+        // Manager 권한 생성
+        Authority authority = Authority.builder()
+                .authorityName("ROLE_MANAGER")
+                .build();
+
+        // Manager 객체 생성
+        User createdManager = User.builder()
+                .email(manager.getEmail())
+                .username(manager.getUsername())
+                .password(passwordEncoder.encode(manager.getPassword()))
+                .authorities(Collections.singleton(authority))
+                .activated(true)
+                .bNo(manager.getBNo())
+                .build();
+
+        // Manager 객체 저장
+        return userRepository.save(createdManager);
+
+    }
+
     /**
      * 회원 정보 조회
      * @author jaemin
@@ -66,7 +102,7 @@ public class UserService {
     }
 
     /**
-     * 사용자 정보 수정 [유저, 매니저]
+     * 사용자 정보 수정 -닉네임 [유저, 매니저]
      * @author jaemin
      * @version 1.0.0
      * 작성일 2022-03-28
@@ -77,24 +113,64 @@ public class UserService {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("해당하는 유저를 찾을 수 없습니다."));
 
         // 유저 정보 수정(닉네임)
-        if (!StringUtil.isNullOrEmpty(updateUserDto.getUsername())) {
+        if (StringUtils.hasText(updateUserDto.getUsername())) {
             user.changeUser(updateUserDto.getUsername());
         }
         return user;
     }
 
+    /**
+     * 사용자 정보 수정 -비밀번호 [유저, 매니저]
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-29
+    **/
     @Transactional
     public void updatePassword(String email, UpdateUserDto updateUserDto) {
         // 요청 유저 정보 조회
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("해당하는 유저를 찾을 수 없습니다."));
 
         // 유저 정보 수정(비밀번호)
-        if (!StringUtil.isNullOrEmpty(updateUserDto.getCurrentPassword())) {
+        if (StringUtils.hasText(updateUserDto.getCurrentPassword())) {
             if (!passwordEncoder.matches(updateUserDto.getCurrentPassword(), user.getPassword())) {
                 throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
             }
         }
         user.encodingPassword(passwordEncoder.encode(updateUserDto.getNewPassword()));
     }
+
+    /**
+     * 중복 회원 검증 - 닉네임
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-29
+     **/
+    private void validateDuplicateUser(String username) {
+        int findUsers = userRepository.countByUsername(username);
+        if (findUsers > 0) {
+            throw new DuplicateUsernameException("닉네임이 중복되었습니다");
+        }
+    }
+
+    /**
+     * 중복 회원 검증 - 이메일
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-29
+     **/
+    private void validateDuplicateEmail(String email) {
+        int findUsers = userRepository.countByUsername(email);
+        if (findUsers > 0) {
+            throw new DuplicateUsernameException("이메일이 중복되었습니다");
+        }
+    }
+
+    /**
+     * 중복 가게명 검증
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-29
+     **/
+    //TODO
 
 }

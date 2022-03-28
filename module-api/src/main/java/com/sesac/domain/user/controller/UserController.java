@@ -3,34 +3,25 @@ package com.sesac.domain.user.controller;
 import com.sesac.domain.common.ResponseDto;
 import com.sesac.domain.common.TokenDto;
 import com.sesac.domain.common.UpdateTokenDto;
-import com.sesac.domain.user.dto.LoginUserDto;
-import com.sesac.domain.user.dto.RequestUserDto;
-import com.sesac.domain.user.dto.ResponseUserDto;
-import com.sesac.domain.user.dto.UpdateUserDto;
-import com.sesac.domain.user.entity.Authority;
+import com.sesac.domain.user.dto.*;
 import com.sesac.domain.user.entity.User;
 import com.sesac.domain.user.service.UserService;
 import com.sesac.domain.jwt.JwtTokenProvider;
 import com.sesac.domain.redis.RedisService;
 import lombok.RequiredArgsConstructor;
-import org.h2.util.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 @RestController
@@ -48,19 +39,19 @@ public class UserController {
     }
 
     /**
-     * 개인 회원 회원가입
+     * 개인 회원가입
      * @author jaemin
      * @version 1.0.0
      * 작성일 2022-03-26
     **/
     @PostMapping("/users/join")
-    public ResponseDto join(@Valid @RequestBody RequestUserDto user, BindingResult result) {
+    public ResponseDto signUpUser(@Valid @RequestBody RequestUserDto userDto, BindingResult result) {
         // validation 검증
         if (result.hasErrors()) {
             return new ResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), result.getFieldError());
         }
 
-        User joinUser = userService.join(user);
+        User joinUser = userService.signUpUser(userDto);
 
         ResponseUserDto responseUserDto = ResponseUserDto.builder()
                 .username(joinUser.getUsername())
@@ -70,9 +61,35 @@ public class UserController {
 
         return new ResponseDto(HttpStatus.CREATED.value(), responseUserDto);
     }
+    
+    /**
+     * 점주 회원가입
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-29
+    **/
+    @PostMapping("/managers/join")
+    public ResponseDto signUpManager(@Valid @RequestBody RequestManagerDto managerDto, BindingResult result) {
+        // validation 검증
+        if (result.hasErrors()) {
+            return new ResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), result.getFieldError());
+        }
+
+        User joinManager = userService.signUpManager(managerDto);
+
+        ResponseUserDto responseUserDto = ResponseUserDto.builder()
+                .username(joinManager.getUsername())
+                .email(joinManager.getEmail())
+                .phoneNum(joinManager.getPhoneNum())
+                .bNo(joinManager.getBNo())
+                .build();
+
+        return new ResponseDto(HttpStatus.CREATED.value(), responseUserDto);
+    }
 
     /**
      * 로그인
+     * 사용자, 점주
      * @author jaemin
      * @version 1.0.0
      * 작성일 2022-03-27
@@ -131,7 +148,7 @@ public class UserController {
 //        }
 
 
-        if( StringUtils.isNullOrEmpty(email) ) {
+        if( !StringUtils.hasText(email) ) {
             throw new IllegalArgumentException(email);
         }
 
@@ -179,6 +196,7 @@ public class UserController {
 
     /**
      * 회원 정보 수정(비밀번호 변경)
+     * 사용자, 점주
      * @author jaemin
      * @version 1.0.0
      * 작성일 2022-03-29

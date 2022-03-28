@@ -31,7 +31,7 @@ public class UserServiceTest {
 
         System.out.println("member.getClass() = " + member.getClass());
         //when
-        User savedUser = userService.join(member);
+        User savedUser = userService.signUpUser(member);
         System.out.println("savedMember.getClass() = " + savedUser.getClass());
         
         //then

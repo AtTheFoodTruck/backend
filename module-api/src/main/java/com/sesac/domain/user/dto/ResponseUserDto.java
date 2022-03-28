@@ -13,6 +13,8 @@ public class ResponseUserDto {
     private String username;
     private String email;
     private String phoneNum;
+    // manager
+    private String bNo;
 
     // Entity -> Dto
     public ResponseUserDto(User joinMember) {

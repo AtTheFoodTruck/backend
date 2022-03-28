@@ -24,10 +24,11 @@ public class User extends BaseEntity {
     @Column(name = "user_id")
     private Long id;
     private String email;
-    private String username; //nickname
+    private String username; // nickname
     private String password;
     private String phoneNum;
     private boolean activated;
+    private String bNo; // 사업자등록번호
 
 //    @Enumerated(EnumType.STRING)
 //    private Role role;
