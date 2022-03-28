@@ -1,6 +1,6 @@
 package com.sesac.domain.user.service;
 
-import com.sesac.domain.user.dto.RequestUser;
+import com.sesac.domain.user.dto.RequestUserDto;
 import com.sesac.domain.user.entity.User;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -22,7 +22,7 @@ public class UserServiceTest {
     @Test
     public void 회원가입() {
         //given
-        RequestUser member = RequestUser.builder()
+        RequestUserDto member = RequestUserDto.builder()
                 .email("jaemin@naver.com")
                 .username("jaemin")
                 .password(passwordEncoder.encode("kadslfjiew"))

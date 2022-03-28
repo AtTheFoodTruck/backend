@@ -53,11 +53,22 @@ public class User extends BaseEntity {
     @JoinColumn(name = "cart_id")
     private Cart cart;
 
-    //Authority
+    // Authority
     @ManyToMany
     @JoinTable(
             name = "user_authority",
             joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "authority_name", referencedColumnName = "authority_name")})
     private Set<Authority> authorities;
+
+
+    // 회원정보 수정 - nickname
+    public void changeUser(String username) {
+        this.username = username;
+    }
+
+    // 회원정보 수정 - password
+    public void encodingPassword(String password) {
+        this.password = password;
+    }
 }

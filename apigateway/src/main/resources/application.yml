@@ -1,5 +1,5 @@
 server:
-  port: 8001
+  port: 8005
 
 eureka:
 #  instance:
@@ -16,28 +16,19 @@ spring:
     name: apigateway-service
   cloud:
     gateway:
-      default-filters:
-        filters:
-          - name: LoggingFilter
-            args:
-              baseMessage: Start Logging Filter.
-              preLogger: true
-              postLogger: true
+#      default-filters:
+#        filters:
+#          - name: LoggingFilter
+#            args:
+#              baseMessage: Start Logging Filter.
+#              preLogger: true
+#              postLogger: true
       routes:
-        # 로그인 요청 route config
+        # 로그인, 회원가입 요청 route config
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/user-service/users/login
-            - Method=POST
-          filters:
-            - RemoveRequestHeader=Cookie
-            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
-        # 회원가입 요청 route config
-        - id: user-service
-          uri: lb://USER-SERVICE
-          predicates:
-            - Path=/user-service/users/join
+            - Path=/user-service/users/login,/user-service/users/join
             - Method=POST
           filters:
             - RemoveRequestHeader=Cookie
@@ -47,14 +38,37 @@ spring:
           uri: lb://USER-SERVICE
           predicates:
             - Path=/user-service/users/**
-            - Method=GET
+            - Method=GET,PATCH,DELETE
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
-#            - JwtAuthenticationGatewayFilterFactory
             - name: JwtAuthentication
               args:
-                role: USER_ROLE
+                role: ROLE_USER
+        # 회원정보수정 [username, password]
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/name,/user-service/password
+            - Method=PATCH
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+            - name: JwtAuthentication
+              args:
+                role: ROLE_USER,ROLE_MANAGER
+        # 회원정보 삭제
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/mypage
+            - Method=DELETE
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+            - name: JwtAuthentication
+              args:
+                role: ROLE_USER,ROLE_MANAGER
 
   # redis 설정
 #  redis:
