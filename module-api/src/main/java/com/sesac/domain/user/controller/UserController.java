@@ -37,13 +37,13 @@ public class UserController {
      * 작성일 2022-03-26
     **/
     @PostMapping("/users/join")
-    public ResponseDto join(@Valid @RequestBody RequestUser member, BindingResult result) {
+    public ResponseDto join(@Valid @RequestBody RequestUser user, BindingResult result) {
         // validation 검증
         if (result.hasErrors()) {
             return new ResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), result.getFieldError());
         }
 
-        User joinUser = userService.join(member);
+        User joinUser = userService.join(user);
 
         ResponseUser responseUser = ResponseUser.builder()
                 .username(joinUser.getUsername())

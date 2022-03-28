@@ -2,8 +2,7 @@ package com.sesac.domain.item.entity;
 
 import com.sesac.domain.common.BaseEntity;
 import com.sesac.domain.order.entity.Image;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -12,7 +11,10 @@ import java.util.List;
 
 import static javax.persistence.FetchType.LAZY;
 
-@Getter @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 @Entity
 public class Item extends BaseEntity {
 

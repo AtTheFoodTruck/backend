@@ -27,8 +27,6 @@ import java.util.ArrayList;
 @Order(-2)
 @Component
 public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilterFactory<JwtAuthenticationGatewayFilterFactory.Config> {
-    @Value("${jwt.secret}")
-    private String secret;
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
@@ -60,11 +58,12 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
                 return onError(exchange, "No Authorization header", HttpStatus.BAD_REQUEST);
             }
 
+            // 토큰 value 추출
             String token = extractToken(request);  // "Bearer " 이후 String
             log.info("JWT token: " + token);
 
             // JWT token 이 유효한지 확인
-            if (!validateToken(token)) {
+            if (!jwtTokenProvider.validateToken(token)) {
                 return onError(exchange, "Invalid Authorization header", HttpStatus.UNAUTHORIZED);
             }
 
@@ -91,9 +90,6 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
         log.error(err);
         return response.setComplete();
     }
-
-
-
 
     /**
      * header 안 Authentication 포함 여부

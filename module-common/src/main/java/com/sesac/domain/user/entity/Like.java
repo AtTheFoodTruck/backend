@@ -2,15 +2,17 @@ package com.sesac.domain.user.entity;
 
 import com.sesac.domain.common.BaseEntity;
 import com.sesac.domain.item.entity.Store;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
 import static javax.persistence.FetchType.LAZY;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 @Table(name = "likes")
-@Getter @Setter
 @Entity
 public class Like extends BaseEntity {
 
@@ -21,7 +23,7 @@ public class Like extends BaseEntity {
     // User
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "user_id")
-    private User User;
+    private User user;
 
     // Store
     @ManyToOne(fetch = LAZY)

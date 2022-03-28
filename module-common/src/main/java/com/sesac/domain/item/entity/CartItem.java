@@ -1,15 +1,16 @@
 package com.sesac.domain.item.entity;
 
 import com.sesac.domain.common.BaseEntity;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
 import static javax.persistence.FetchType.LAZY;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Setter
 @Entity
 public class CartItem extends BaseEntity {
 

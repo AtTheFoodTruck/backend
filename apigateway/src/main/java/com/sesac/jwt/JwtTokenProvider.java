@@ -50,9 +50,12 @@ public class JwtTokenProvider implements Serializable {
     **/
     public Map<String, Object> getUserParseInfo(String accessToken) {
         Claims claims = getAllClaimsFromToken(accessToken);
+
         Map<String, Object> result = new HashMap<>();
-        result.put("email", claims.getSubject());
+        result.put("email", claims.getSubject()); //expeted : getSubject("email"),
         result.put(AUTHORITIES_KEY, claims.get(AUTHORITIES_KEY));
+
+        log.info("권한이 담긴 result  = {}", result);
 
         return result;
     }
@@ -127,7 +130,7 @@ public class JwtTokenProvider implements Serializable {
         Date validity = new Date(now + JWT_ACCESS_TOKEN_VALIDITY); //yml에 정의한 token 만료시간
 
         return Jwts.builder()
-                .setSubject(authentication.getName())
+                .setSubject(authentication.getName()) //email
                 .claim(AUTHORITIES_KEY, authorities)
                 .signWith(key, SignatureAlgorithm.HS512)
                 .setExpiration(validity)

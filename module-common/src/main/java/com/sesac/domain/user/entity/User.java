@@ -33,19 +33,19 @@ public class User extends BaseEntity {
 //    private Role role;
 
     // Order
-    @OneToMany(mappedBy = "User")
+    @OneToMany(mappedBy = "user")
     private List<Order> orders = new ArrayList<>();
 
     // Store
-    @OneToOne(fetch = LAZY, mappedBy = "User")
+    @OneToOne(fetch = LAZY, mappedBy = "user")
     private Store store;
 
     // Review
-    @OneToMany(mappedBy = "User")
+    @OneToMany(mappedBy = "user")
     private List<Review> reviews = new ArrayList<>();
 
     // Like
-    @OneToMany(mappedBy = "User")
+    @OneToMany(mappedBy = "user")
     private List<Like> likes = new ArrayList<>();
 
     // Cart
