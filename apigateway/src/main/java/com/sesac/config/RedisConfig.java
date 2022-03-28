@@ -1,6 +1,6 @@
 package com.sesac.config;
 
-import com.sesac.jwt.Token;
+import com.sesac.redis.RedisToken;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -23,7 +23,7 @@ public class RedisConfig {
         redisTemplate.setKeySerializer(new StringRedisSerializer());
 
         // Token 객체를 json 형태로 깨지지 않고 받기 위한 직렬화
-        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(Token.class));
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(RedisToken.class));
         return redisTemplate;
     }
 }
