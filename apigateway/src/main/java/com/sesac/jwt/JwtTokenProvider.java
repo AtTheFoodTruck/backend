@@ -43,13 +43,13 @@ public class JwtTokenProvider implements Serializable {
 
     /**
      * token 으로부터 username, role map 반환
-     * @param accessToken: jwt access token
+     * @param token: jwt access token
      * @author jjaen
      * @version 1.0.0
      * 작성일 2022/03/27
     **/
-    public Map<String, Object> getUserParseInfo(String accessToken) {
-        Claims claims = getAllClaimsFromToken(accessToken);
+    public Map<String, Object> getUserParseInfo(String token) {
+        Claims claims = getAllClaimsFromToken(token);
         Map<String, Object> result = new HashMap<>();
         result.put("email", claims.getSubject());
         result.put(AUTHORITIES_KEY, claims.get(AUTHORITIES_KEY));

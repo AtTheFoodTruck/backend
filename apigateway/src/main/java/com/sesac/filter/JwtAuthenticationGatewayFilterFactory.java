@@ -64,7 +64,7 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
             log.info("JWT token: " + token);
 
             // JWT token 이 유효한지 확인
-            if (!validateToken(token)) {
+            if (!jwtTokenProvider.validateToken(token)) {
                 return onError(exchange, "Invalid Authorization header", HttpStatus.UNAUTHORIZED);
             }
 
@@ -91,9 +91,6 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
         log.error(err);
         return response.setComplete();
     }
-
-
-
 
     /**
      * header 안 Authentication 포함 여부

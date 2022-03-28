@@ -1,7 +1,6 @@
 package com.sesac.redis;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import org.springframework.data.redis.core.RedisHash;
 
