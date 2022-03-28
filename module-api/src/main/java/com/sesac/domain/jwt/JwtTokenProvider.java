@@ -1,7 +1,11 @@
-package com.sesac.jwt;
+package com.sesac.domain.jwt;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,16 +20,28 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class JwtTokenProvider implements Serializable {
+public class JwtTokenProvider implements Serializable, InitializingBean {
     private static final long serialVersionUID = -2550185165626007488L;
 
     private static final String AUTHORITIES_KEY = "auth";
 
+    private final String secret;
     private static final long JWT_ACCESS_TOKEN_VALIDITY = 60 * 30; // 30 minutes
     private static final long JWT_REFRESH_TOKEN_VALIDITY = 60 * 60 * 24 * 7; // 1 week
 
     private Key key;
 
+    public JwtTokenProvider(
+            @Value("${jwt.secret}") String secret
+    ) {
+        this.secret = secret;
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        this.key = Keys.hmacShaKeyFor(keyBytes);
+    }
     /**
      * token 의 모든 claim 반환
      * @param token: jwt token

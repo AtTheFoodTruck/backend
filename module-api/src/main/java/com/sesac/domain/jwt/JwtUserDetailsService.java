@@ -1,4 +1,4 @@
-package com.sesac.jwt;
+package com.sesac.domain.jwt;
 
 import com.sesac.domain.user.entity.User;
 import com.sesac.domain.user.repository.UserRepository;

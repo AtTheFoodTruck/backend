@@ -1,12 +1,8 @@
 package com.sesac.domain.security;
 
-import com.sesac.domain.user.service.UserService;
-import com.sesac.jwt.JwtTokenProvider;
+import com.sesac.domain.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -60,7 +56,8 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 // request 처리
                 .and()
                     .authorizeRequests()
-                    .antMatchers().permitAll()
+                    .antMatchers("/users/join").permitAll()
+                    .antMatchers("/users/login").permitAll()
                     .anyRequest().authenticated()
                 
                 // 로그인

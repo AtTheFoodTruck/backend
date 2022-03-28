@@ -3,14 +3,13 @@ package com.sesac.domain.user.controller;
 import com.sesac.domain.common.ResponseDto;
 import com.sesac.domain.common.TokenDto;
 import com.sesac.domain.common.UpdateTokenDto;
+import com.sesac.domain.user.dto.LoginUser;
 import com.sesac.domain.user.dto.RequestUser;
 import com.sesac.domain.user.dto.ResponseUser;
 import com.sesac.domain.user.entity.User;
 import com.sesac.domain.user.service.UserService;
-import com.sesac.jwt.JwtTokenProvider;
-import com.sesac.redis.RedisService;
-import com.sesac.redis.RedisToken;
-import io.jsonwebtoken.ExpiredJwtException;
+import com.sesac.domain.jwt.JwtTokenProvider;
+import com.sesac.domain.redis.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,6 +19,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,6 +34,12 @@ public class UserController {
     private final UserService userService;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final RedisService redisService;
+
+
+    @GetMapping("/welcome")
+    public String welcome() {
+        return "welcome";
+    }
 
     /**
      * 개인 회원 회원가입
@@ -67,11 +73,7 @@ public class UserController {
     **/
     // 로그인
     @PostMapping("/users/login")
-    public ResponseEntity<TokenDto> authorize(@Valid @RequestBody RequestUser requestUser, BindingResult result) {
-
-        if (result.hasErrors()) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<TokenDto> authorize(@RequestBody LoginUser requestUser) {
 
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(requestUser.getEmail(), requestUser.getPassword());
@@ -96,6 +98,7 @@ public class UserController {
         // jwt토큰 return                           body            header          status
         return new ResponseEntity<>(new TokenDto(accessToken), httpHeaders, HttpStatus.OK);
     }
+
 
     @PostMapping("/refresh")
     public ResponseEntity<TokenDto> updateRefreshToken(@Valid @RequestBody UpdateTokenDto tokenDto, BindingResult result) {

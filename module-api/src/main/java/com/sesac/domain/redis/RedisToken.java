@@ -1,4 +1,4 @@
-package com.sesac.redis;
+package com.sesac.domain.redis;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

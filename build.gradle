@@ -49,7 +49,7 @@ subprojects {
 project(':module-api') {
     dependencies {
         implementation project(path: ':module-common', configuration: 'default')
-        implementation project(path: ':apigateway', configuration: 'default')
+//        implementation project(path: ':apigateway', configuration: 'default')
     }
 }
 

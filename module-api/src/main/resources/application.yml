@@ -1,11 +1,12 @@
+server:
+  port: 8888
 
-#spring:
-#  datasource:
-#    url: jdbc:h2:tcp://localhost/~/foodtruck
-#    username: sa
-#    password:
-#    driver-class-name: org.h2.Driver
 spring:
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/foodtruck
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
 #  main:
 #    web-application-type: reactive
   application:
@@ -30,7 +31,7 @@ eureka:
     service-url:
       defaultZone: http://127.0.0.1:8761/eureka
 
-server:
-  port: 0
+jwt:
+  secret: c2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQtc2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQK
 
-debug: true
+#debug: true
