@@ -108,14 +108,15 @@ public class UserController {
 
         // refresh validation 체크
         if (!jwtTokenProvider.validateToken(refreshToken)) {
-
-//            return onError(exchange, "Invalid Authorization header", HttpStatus.UNAUTHORIZED);
+//            TODO error 처리
         }
 
         // refresh token validation 통과 시, email 추출
         String email = (String) jwtTokenProvider.getUserParseInfo(refreshToken).get("email");
+
         // email 없는 경우
 //        if (email == null) {
+//            TODO error 처리
 //            return new ResponseDto<>(new TokenDto(null), httpHeaders, HttpStatus.BAD_REQUEST);
 //        }
 
@@ -125,6 +126,7 @@ public class UserController {
         // redis 에 저장된 refresh token 이 요청으로 들어온 token 과 동일한지 체크
         if (!refreshToken.equals(refreshTokenFromDb)) {
             // 잘못된 refresh token 이거나, 시간이 만료돼서 redis 에 refresh token 이 없거나(null)
+            // TODO error 처리
         }
 
         // refresh token 이 유효하고, redis 에 저장되어 있는 것과 동일한 경우
