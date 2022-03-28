@@ -1,6 +1,6 @@
-package com.sesac.config;
+package com.sesac.domain.config;
 
-import com.sesac.redis.RedisToken;
+import com.sesac.domain.redis.RedisToken;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;

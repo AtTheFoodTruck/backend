@@ -1,6 +1,6 @@
 package com.sesac.domain.security;
 
-import com.sesac.jwt.JwtTokenProvider;
+import com.sesac.domain.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;

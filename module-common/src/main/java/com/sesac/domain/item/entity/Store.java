@@ -2,11 +2,10 @@ package com.sesac.domain.item.entity;
 
 import com.sesac.domain.common.BaseEntity;
 import com.sesac.domain.user.entity.Like;
-import com.sesac.domain.user.entity.Member;
 import com.sesac.domain.order.entity.Image;
 import com.sesac.domain.order.entity.Review;
-import lombok.Getter;
-import lombok.Setter;
+import com.sesac.domain.user.entity.User;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -15,6 +14,9 @@ import java.util.List;
 
 import static javax.persistence.FetchType.LAZY;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter @Setter
 @Entity
 public class Store extends BaseEntity {
@@ -38,10 +40,10 @@ public class Store extends BaseEntity {
     @Embedded
     private Image storeImage;
 
-    // Member
+    // User
     @OneToOne(fetch = LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "user_id")
+    private User user;
 
     // Review
     @OneToMany(mappedBy = "store")

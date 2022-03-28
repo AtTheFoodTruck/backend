@@ -1,37 +1,37 @@
 package com.sesac.filter;
 
 
-import com.sesac.jwt.JwtTokenProvider;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.core.annotation.Order;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.security.Key;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Order(-2)
 @Component
 public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilterFactory<JwtAuthenticationGatewayFilterFactory.Config> {
-    @Value("${jwt.secret}")
-    private String secret;
 
+//    @Autowired
+//    private JwtTokenProvider jwtTokenProvider;
     @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    private TokenProvider tokenProvider;
     private Key key;
 
     public JwtAuthenticationGatewayFilterFactory() {
@@ -43,6 +43,7 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
     public static class Config {
         private String role;
     }
+
 
     /**
      * Jwt token 인증 filter
@@ -60,11 +61,12 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
                 return onError(exchange, "No Authorization header", HttpStatus.BAD_REQUEST);
             }
 
+            // 토큰 value 추출
             String token = extractToken(request);  // "Bearer " 이후 String
             log.info("JWT token: " + token);
 
             // JWT token 이 유효한지 확인
-            if (!jwtTokenProvider.validateToken(token)) {
+            if (!tokenProvider.validateToken(token)) {
                 return onError(exchange, "Invalid Authorization header", HttpStatus.UNAUTHORIZED);
             }
 
@@ -123,7 +125,7 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
     **/
     private boolean hasRole(Config config, String token) {
         log.info("hasRole token: " + token);
-        ArrayList<String> authorities = (ArrayList<String>) jwtTokenProvider.getUserParseInfo(token).get("role");
+        ArrayList<String> authorities = (ArrayList<String>) tokenProvider.getUserParseInfo(token).get("role");
         log.info("role of request user: " + authorities);
 
         if (! authorities.contains(config.getRole())) {
@@ -131,4 +133,5 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
         }
         return true;
     }
+
 }

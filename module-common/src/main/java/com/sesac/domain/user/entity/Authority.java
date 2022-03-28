@@ -5,8 +5,10 @@ import lombok.*;
 import javax.persistence.*;
 
 @Builder
-@Table(name = "authority")
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Table(name = "authority")
 @Entity
 public class Authority {
     @Id
