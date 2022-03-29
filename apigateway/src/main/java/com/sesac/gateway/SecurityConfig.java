@@ -16,6 +16,7 @@ public class SecurityConfig {
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity httpSecurity) {
         httpSecurity.authorizeExchange()
                 .pathMatchers("/user-service/users/**").permitAll()
+                .pathMatchers("/user-service/managers/**").permitAll()
 //                .anyExchange().authenticated().and()
 //                .httpBasic().and()
 //                .formLogin().loginPage(Constants.LOGIN_URL)                    //

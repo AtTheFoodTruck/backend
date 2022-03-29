@@ -69,6 +69,18 @@ spring:
             - name: JwtAuthentication
               args:
                 role: ROLE_USER,ROLE_MANAGER
+        # 매니저 서비스
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/managers/**
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+#              - name: JwtAuthentication
+#                args:
+#                  role: ROLE_MANAGER
 
   # redis 설정
 #  redis:

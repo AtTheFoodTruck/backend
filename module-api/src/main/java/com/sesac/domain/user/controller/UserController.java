@@ -164,7 +164,6 @@ public class UserController {
         // refresh token 이 유효하고, redis 에 저장되어 있는 것과 동일한 경우
         // 새로운 access token 발급
         Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String newAccessToken = jwtTokenProvider.createToken(authentication, false);
 
