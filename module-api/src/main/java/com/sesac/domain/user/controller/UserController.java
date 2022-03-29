@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -46,20 +47,27 @@ public class UserController {
     **/
     @PostMapping("/users/join")
     public ResponseDto signUpUser(@Valid @RequestBody RequestUserDto userDto, BindingResult result) {
+
         // validation 검증
-        if (result.hasErrors()) {
-            return new ResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), result.getFieldError());
+        String errorMessage = result.getFieldErrors().stream()
+                .map(e -> e.getField())
+                .collect(Collectors.joining(","));
+
+        if (StringUtils.hasText(errorMessage)) {
+            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), errorMessage);
         }
 
         User joinUser = userService.signUpUser(userDto);
 
-        ResponseUserDto responseUserDto = ResponseUserDto.builder()
-                .username(joinUser.getUsername())
-                .email(joinUser.getEmail())
-                .phoneNum(joinUser.getPhoneNum())
-                .build();
+        return new ResponseDto(HttpStatus.CREATED.value(), new ResponseUserDto(joinUser));
 
-        return new ResponseDto(HttpStatus.CREATED.value(), responseUserDto);
+//        ResponseUserDto responseUserDto = ResponseUserDto.builder()
+//                .username(joinUser.getUsername())
+//                .email(joinUser.getEmail())
+//                .phoneNum(joinUser.getPhoneNum())
+//                .build();
+//
+//        return new ResponseDto(HttpStatus.CREATED.value(), responseUserDto);
     }
     
     /**
@@ -70,21 +78,28 @@ public class UserController {
     **/
     @PostMapping("/managers/join")
     public ResponseDto signUpManager(@Valid @RequestBody RequestManagerDto managerDto, BindingResult result) {
+
         // validation 검증
-        if (result.hasErrors()) {
-            return new ResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), result.getFieldError());
+        String errorMessage = result.getFieldErrors().stream()
+                .map(e -> e.getField())
+                .collect(Collectors.joining(","));
+
+        if (StringUtils.hasText(errorMessage)) {
+            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), errorMessage);
         }
 
         User joinManager = userService.signUpManager(managerDto);
 
-        ResponseUserDto responseUserDto = ResponseUserDto.builder()
-                .username(joinManager.getUsername())
-                .email(joinManager.getEmail())
-                .phoneNum(joinManager.getPhoneNum())
-                .bNo(joinManager.getBNo())
-                .build();
+        return new ResponseDto(HttpStatus.CREATED.value(), new ResponseUserDto(joinManager));
 
-        return new ResponseDto(HttpStatus.CREATED.value(), responseUserDto);
+//        ResponseUserDto responseUserDto = ResponseUserDto.builder()
+//                .username(joinManager.getUsername())
+//                .email(joinManager.getEmail())
+//                .phoneNum(joinManager.getPhoneNum())
+//                .bNo(joinManager.getBNo())
+//                .build();
+//
+//        return new ResponseDto(HttpStatus.CREATED.value(), responseUserDto);
     }
 
     /**
@@ -122,7 +137,12 @@ public class UserController {
         return new ResponseEntity<>(new TokenDto(accessToken), httpHeaders, HttpStatus.OK);
     }
 
-
+    /**
+     * access token 갱신
+     * @author jjaen
+     * @version 1.0.0
+     * 작성일 2022-03-29
+    **/
     @PostMapping("/refresh")
     public ResponseEntity<TokenDto> updateRefreshToken(@Valid @RequestBody UpdateTokenDto tokenDto, BindingResult result) {
         if (result.hasErrors()) {
@@ -185,10 +205,13 @@ public class UserController {
      **/
     @PatchMapping("/name")
     public ResponseDto updateUsername(Principal principal,
-                                    @Valid @RequestBody UpdateUserDto updateUserDto,
-                                    BindingResult result) {
+                                      @Valid @RequestBody UpdateNameDto updateNameDto,
+                                      BindingResult result) {
+        if (result.hasErrors()) {
+            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), result.getFieldError());
+        }
 
-        User updatedInfo = userService.updateUsername(principal.getName(), updateUserDto);
+        User updatedInfo = userService.updateUsername(principal.getName(), updateNameDto);
 
         return new ResponseDto(HttpStatus.OK.value(), updatedInfo);
 
@@ -203,13 +226,40 @@ public class UserController {
     **/
     @PatchMapping("/password")
     public ResponseDto updatePassword(Principal principal,
-                                    @Valid @RequestBody UpdateUserDto updateUserDto,
-                                    BindingResult result) {
+                                      @Valid @RequestBody UpdatePwDto updatePwDto,
+                                      BindingResult result) {
+        if (result.hasErrors()) {
+            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), result.getFieldError());
+        }
 
-        userService.updatePassword(principal.getName(), updateUserDto);
+        userService.updatePassword(principal.getName(), updatePwDto);
 
-        return new ResponseDto(HttpStatus.OK.value());
+        return new ResponseDto(HttpStatus.OK.value(), "비밀번호 수정 성공");
+    }
 
+    /**
+     * 이메일 중복 체크
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-29
+     **/
+    @PostMapping("/validation/email")
+    public ResponseDto validateDuplicateEmail(@RequestBody UserDto userDto) {
+
+        userService.validateDuplicateEmail(userDto.getEmail());
+        return new ResponseDto(HttpStatus.OK.value(), "이메일 중복 체크 성공");
+    }
+
+    /**
+     * 닉네임 중복 체크
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-29
+    **/
+    @PostMapping("/validation/name")
+    public ResponseDto validateDuplicateUsername(@RequestBody UserDto userDto) {
+        userService.validateDuplicateUser(userDto.getUsername());
+        return new ResponseDto(HttpStatus.OK.value(), "닉네임 중복 체크 성공");
     }
 
 //        String authority = user.getAuthorities().stream()
