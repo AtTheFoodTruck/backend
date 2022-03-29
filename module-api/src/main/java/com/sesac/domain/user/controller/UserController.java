@@ -60,14 +60,6 @@ public class UserController {
         User joinUser = userService.signUpUser(userDto);
 
         return new ResponseDto(HttpStatus.CREATED.value(), new ResponseUserDto(joinUser));
-
-//        ResponseUserDto responseUserDto = ResponseUserDto.builder()
-//                .username(joinUser.getUsername())
-//                .email(joinUser.getEmail())
-//                .phoneNum(joinUser.getPhoneNum())
-//                .build();
-//
-//        return new ResponseDto(HttpStatus.CREATED.value(), responseUserDto);
     }
     
     /**
@@ -91,15 +83,6 @@ public class UserController {
         User joinManager = userService.signUpManager(managerDto);
 
         return new ResponseDto(HttpStatus.CREATED.value(), new ResponseUserDto(joinManager));
-
-//        ResponseUserDto responseUserDto = ResponseUserDto.builder()
-//                .username(joinManager.getUsername())
-//                .email(joinManager.getEmail())
-//                .phoneNum(joinManager.getPhoneNum())
-//                .bNo(joinManager.getBNo())
-//                .build();
-//
-//        return new ResponseDto(HttpStatus.CREATED.value(), responseUserDto);
     }
 
     /**
@@ -261,11 +244,5 @@ public class UserController {
         userService.validateDuplicateUser(userDto.getUsername());
         return new ResponseDto(HttpStatus.OK.value(), "닉네임 중복 체크 성공");
     }
-
-//        String authority = user.getAuthorities().stream()
-//                .map(a -> a.getAuthorityName())
-//                .collect(Collectors.joining(","));
-//        if (authority.contains("ROLE_USER"))
-//        }
 
 }
