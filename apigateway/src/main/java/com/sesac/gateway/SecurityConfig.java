@@ -15,8 +15,12 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity httpSecurity) {
         httpSecurity.authorizeExchange()
-                .pathMatchers("/user-service/users/**").permitAll()
-                .pathMatchers("/user-service/managers/**").permitAll()
+                .pathMatchers(
+                        "/user-service/users/join",
+                        "/user-service/managers/join",
+                        "/user-service/login",
+                        "/user-service/validation/email",
+                        "/user-service/validation/name").permitAll()
 //                .anyExchange().authenticated().and()
 //                .httpBasic().and()
 //                .formLogin().loginPage(Constants.LOGIN_URL)                    //
@@ -29,7 +33,6 @@ public class SecurityConfig {
         return httpSecurity.build();
     }
 
-    //
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();

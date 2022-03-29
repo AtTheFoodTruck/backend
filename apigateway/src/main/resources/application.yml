@@ -24,11 +24,11 @@ spring:
 #              preLogger: true
 #              postLogger: true
       routes:
-        # 로그인, 회원가입 요청 route config
+        # 로그인, 회원가입, 중복체크
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/user-service/users/login,/user-service/users/join
+            - Path=/user-service/login, /user-service/users/join, /user-service/validation/**
             - Method=POST
           filters:
             - RemoveRequestHeader=Cookie
@@ -45,24 +45,12 @@ spring:
             - name: JwtAuthentication
               args:
                 role: ROLE_USER
-        # 회원정보수정 [username, password]
+        # 회원정보 수정, 회원정보 삭제
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/user-service/name,/user-service/password
-            - Method=PATCH
-          filters:
-            - RemoveRequestHeader=Cookie
-            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
-            - name: JwtAuthentication
-              args:
-                role: ROLE_USER,ROLE_MANAGER
-        # 회원정보 삭제
-        - id: user-service
-          uri: lb://USER-SERVICE
-          predicates:
-            - Path=/user-service/mypage
-            - Method=DELETE
+            - Path=/user-service/name, /user-service/password, /user-service/mypage
+            - Method=PATCH,DELETE
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
@@ -78,9 +66,9 @@ spring:
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
-#              - name: JwtAuthentication
-#                args:
-#                  role: ROLE_MANAGER
+            - name: JwtAuthentication
+              args:
+                role: ROLE_MANAGER
 
   # redis 설정
 #  redis:
