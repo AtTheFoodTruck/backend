@@ -21,6 +21,7 @@ import reactor.core.publisher.Mono;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -41,7 +42,8 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
     @Getter
     @AllArgsConstructor
     public static class Config {
-        private String role;
+        private List<String> roles = new ArrayList<String>();
+
     }
 
 
@@ -117,19 +119,26 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
     /**
      * role 체크
      * - filter 로 들어온 request 에 필요한 role 을 유저가 갖고 있는지
-     * @param config: 해당 request 에 필요한 role
+     * @param configs: 해당 request 에 필요한 role
      * @param token: jwt access token
      * @author jjaen
      * @version 1.0.0
      * 작성일 2022/03/27
     **/
-    private boolean hasRole(Config config, String token) {
+    private boolean hasRole(Config configs, String token) {
         log.info("hasRole token: " + token);
-        ArrayList<String> authorities = (ArrayList<String>) tokenProvider.getUserParseInfo(token).get("role");
-        log.info("role of request user: " + authorities);
+//        ArrayList<String> authorities = (ArrayList<String>) tokenProvider.getUserParseInfo(token).get("role");
+//        log.info("role of request user: " + authorities);
+//        if (! authorities.contains(config.getRoles())) {
+//            return false;
+//        }
+//        return true;
+        String role = (String) tokenProvider.getUserParseInfo(token).get("role"); // ROLE_USer, ROLE_MANAGER, ROLE_ADMIN
+        log.info("role of request user: " + role);
 
-        if (! authorities.contains(config.getRole())) {
-            return false;
+        if( !configs.getRoles().stream()
+                .anyMatch(s -> s.equals(role))){
+             return false;
         }
         return true;
     }

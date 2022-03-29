@@ -5,23 +5,23 @@ import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 
 @Builder
 @AllArgsConstructor
 @Data
-public class RequestUser {
+public class RequestUserDto {
 
-    @NotNull(message = "이메일 정보는 필수입니다.")
+    @NotBlank(message = "이메일 정보는 필수입니다.")
     @Email
     private String email;
 
-    @NotNull(message = "닉네임 정보는 필수입니다.")
+    @NotBlank(message = "닉네임 정보는 필수입니다.")
     private String username; //닉네임
 
-    @NotNull(message = "비밀번호는 필수입니다.")
+    @NotBlank(message = "비밀번호는 필수입니다.")
     private String password;
 
-    @NotNull(message = "핸드폰 정보는 필수입니다.")
+    @NotBlank(message = "핸드폰 정보는 필수입니다.")
     private String phoneNum;
 }

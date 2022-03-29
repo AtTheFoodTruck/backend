@@ -3,9 +3,7 @@ package com.sesac.domain.user.controller;
 import com.sesac.domain.common.ResponseDto;
 import com.sesac.domain.common.TokenDto;
 import com.sesac.domain.common.UpdateTokenDto;
-import com.sesac.domain.user.dto.LoginUser;
-import com.sesac.domain.user.dto.RequestUser;
-import com.sesac.domain.user.dto.ResponseUser;
+import com.sesac.domain.user.dto.*;
 import com.sesac.domain.user.entity.User;
 import com.sesac.domain.user.service.UserService;
 import com.sesac.domain.jwt.JwtTokenProvider;
@@ -18,13 +16,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.Principal;
 
 @RequiredArgsConstructor
 @RestController
@@ -42,38 +39,64 @@ public class UserController {
     }
 
     /**
-     * 개인 회원 회원가입
+     * 개인 회원가입
      * @author jaemin
      * @version 1.0.0
      * 작성일 2022-03-26
     **/
     @PostMapping("/users/join")
-    public ResponseDto join(@Valid @RequestBody RequestUser user, BindingResult result) {
+    public ResponseDto signUpUser(@Valid @RequestBody RequestUserDto userDto, BindingResult result) {
         // validation 검증
         if (result.hasErrors()) {
             return new ResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), result.getFieldError());
         }
 
-        User joinUser = userService.join(user);
+        User joinUser = userService.signUpUser(userDto);
 
-        ResponseUser responseUser = ResponseUser.builder()
+        ResponseUserDto responseUserDto = ResponseUserDto.builder()
                 .username(joinUser.getUsername())
                 .email(joinUser.getEmail())
                 .phoneNum(joinUser.getPhoneNum())
                 .build();
 
-        return new ResponseDto(HttpStatus.CREATED.value(), responseUser);
+        return new ResponseDto(HttpStatus.CREATED.value(), responseUserDto);
+    }
+    
+    /**
+     * 점주 회원가입
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-29
+    **/
+    @PostMapping("/managers/join")
+    public ResponseDto signUpManager(@Valid @RequestBody RequestManagerDto managerDto, BindingResult result) {
+        // validation 검증
+        if (result.hasErrors()) {
+            return new ResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), result.getFieldError());
+        }
+
+        User joinManager = userService.signUpManager(managerDto);
+
+        ResponseUserDto responseUserDto = ResponseUserDto.builder()
+                .username(joinManager.getUsername())
+                .email(joinManager.getEmail())
+                .phoneNum(joinManager.getPhoneNum())
+                .bNo(joinManager.getBNo())
+                .build();
+
+        return new ResponseDto(HttpStatus.CREATED.value(), responseUserDto);
     }
 
     /**
      * 로그인
+     * 사용자, 점주
      * @author jaemin
      * @version 1.0.0
      * 작성일 2022-03-27
     **/
     // 로그인
     @PostMapping("/users/login")
-    public ResponseEntity<TokenDto> authorize(@RequestBody LoginUser requestUser) {
+    public ResponseEntity<TokenDto> authorize(@RequestBody LoginUserDto requestUser) {
 
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(requestUser.getEmail(), requestUser.getPassword());
@@ -117,11 +140,17 @@ public class UserController {
         // refresh token validation 통과 시, email 추출
         String email = (String) jwtTokenProvider.getUserParseInfo(refreshToken).get("email");
 
+
         // email 없는 경우
 //        if (email == null) {
 //            TODO error 처리
 //            return new ResponseDto<>(new TokenDto(null), httpHeaders, HttpStatus.BAD_REQUEST);
 //        }
+
+
+        if( !StringUtils.hasText(email) ) {
+            throw new IllegalArgumentException(email);
+        }
 
         // redis 에서 refresh token 가져옴
         String refreshTokenFromDb = redisService.getRefreshToken(email);
@@ -146,4 +175,47 @@ public class UserController {
         // jwt 토큰 return                           body            header          status
         return new ResponseEntity<>(new TokenDto(newAccessToken), httpHeaders, HttpStatus.OK);
     }
+
+    /**
+     * 회원 정보 수정(닉네임 변경)
+     * 사용자, 점주
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-28
+     **/
+    @PatchMapping("/name")
+    public ResponseDto updateUsername(Principal principal,
+                                    @Valid @RequestBody UpdateUserDto updateUserDto,
+                                    BindingResult result) {
+
+        User updatedInfo = userService.updateUsername(principal.getName(), updateUserDto);
+
+        return new ResponseDto(HttpStatus.OK.value(), updatedInfo);
+
+    }
+
+    /**
+     * 회원 정보 수정(비밀번호 변경)
+     * 사용자, 점주
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-29
+    **/
+    @PatchMapping("/password")
+    public ResponseDto updatePassword(Principal principal,
+                                    @Valid @RequestBody UpdateUserDto updateUserDto,
+                                    BindingResult result) {
+
+        userService.updatePassword(principal.getName(), updateUserDto);
+
+        return new ResponseDto(HttpStatus.OK.value());
+
+    }
+
+//        String authority = user.getAuthorities().stream()
+//                .map(a -> a.getAuthorityName())
+//                .collect(Collectors.joining(","));
+//        if (authority.contains("ROLE_USER"))
+//        }
+
 }

@@ -2,6 +2,7 @@ package com.sesac.domain.user.entity;
 
 import lombok.*;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.*;
 
 @Builder

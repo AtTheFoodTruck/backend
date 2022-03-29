@@ -8,14 +8,16 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 @Data
-public class ResponseUser {
+public class ResponseUserDto {
 
     private String username;
     private String email;
     private String phoneNum;
+    // manager
+    private String bNo;
 
     // Entity -> Dto
-    public ResponseUser(User joinMember) {
+    public ResponseUserDto(User joinMember) {
         this.username = joinMember.getUsername();
         this.email = joinMember.getEmail();
         this.phoneNum = joinMember.getPhoneNum();
