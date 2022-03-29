@@ -1,8 +1,11 @@
 package com.sesac.domain.user.service;
 
 import com.sesac.domain.common.ResponseDto;
+import com.sesac.domain.common.TokenDto;
+import com.sesac.domain.common.UpdateTokenDto;
 import com.sesac.domain.exception.DuplicateUsernameException;
 import com.sesac.domain.jwt.JwtTokenProvider;
+import com.sesac.domain.redis.RedisService;
 import com.sesac.domain.user.dto.*;
 import com.sesac.domain.user.entity.Authority;
 import com.sesac.domain.user.entity.User;
@@ -10,13 +13,16 @@ import com.sesac.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Collections;
@@ -32,6 +38,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final RedisTemplate redisTemplate;
+    private final RedisService redisService;
 
     /**
      * 개인 회원 회원가입
@@ -201,6 +208,45 @@ public class UserService {
                 .set(logoutDto.getAccessToken(), "logout", expiration, TimeUnit.MILLISECONDS);
 
         return new ResponseDto(HttpStatus.OK.value(), "로그아웃 되었습니다.");
+    }
+
+    /**
+     * accessToken 재발급
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-29
+    **/
+    public ResponseEntity<?> updateRefreshToken(UpdateTokenDto tokenDto) {
+
+        // 1. dto에서 토큰 추출
+        String accessToken = tokenDto.getAccessToken();
+        String refreshToken = tokenDto.getRefreshToken();
+
+        // 2. refresh 토큰 validation 검증
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
+            throw new IllegalArgumentException("Refresh Token 정보가 유효하지 않습니다.");
+        }
+
+        // 3. Authentication 객체 추출
+        Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
+
+        // 4. redis에서 Refresh 토큰 value 추출
+        String refreshTokenFromDB = redisService.getRefreshToken(authentication.getName());
+
+        // 5. 로그아웃된 토큰인지 검증
+        if (ObjectUtils.isEmpty(refreshTokenFromDB)) {
+            throw new IllegalArgumentException("잘못된 요청입니다.");
+        }
+
+        // 6. 새로운 토큰 생성
+        String newAccessToken = jwtTokenProvider.createToken(authentication, false);
+
+        // 새로운 access token Headers 에 추가
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("Authorization", "Bearer " + newAccessToken);
+
+        // jwt 토큰 return                           body            header          status
+        return new ResponseEntity<>(new TokenDto(newAccessToken), httpHeaders, HttpStatus.OK);
     }
 
     /**
