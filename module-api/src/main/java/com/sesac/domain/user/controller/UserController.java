@@ -110,7 +110,7 @@ public class UserController {
         String accessToken = jwtTokenProvider.createToken(authentication, false);
         String refreshToken = jwtTokenProvider.createToken(authentication, true);
 
-        // redis 에 저장
+        // redis에 저장
         redisService.setRefreshToken(requestUser.getEmail(), refreshToken);
 
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -162,6 +162,7 @@ public class UserController {
         }
 
         return userService.updateRefreshToken(updateTokenDto);
+
     }
 
     /**
