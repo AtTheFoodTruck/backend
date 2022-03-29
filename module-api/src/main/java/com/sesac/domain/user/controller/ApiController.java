@@ -4,6 +4,7 @@ import com.sesac.domain.common.ResponseDto;
 import com.sesac.domain.user.api.BusinessApiRestTemplate;
 import com.sesac.domain.user.dto.RequestStatusDto;
 import com.sesac.domain.user.dto.RequestValidateDto;
+import com.sesac.domain.user.dto.ResponseBNoDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
@@ -39,10 +40,10 @@ public class ApiController {
 //        }
 
         if (!apiRestTemplate.statusApi(statusDto)){
-            return new ResponseDto(HttpStatus.OK.value(), "사업자 조회 실패");
+            return new ResponseDto(HttpStatus.OK.value(), new ResponseBNoDto(false));
         }
 
-        return new ResponseDto(HttpStatus.OK.value(), "사업자 조회 성공");
+        return new ResponseDto(HttpStatus.OK.value(), new ResponseBNoDto(true));
     }
 
     /**
@@ -52,14 +53,14 @@ public class ApiController {
      * 작성일 2022/03/29
     **/
     @PostMapping("/validate")
-    public ResponseDto bNoValidate(@Valid @RequestBody RequestValidateDto validateDto, BindingResult result) {
+    public ResponseDto bNoValidate(@Valid @RequestBody RequestValidateDto requestValidateDto, BindingResult result) {
         if (result.hasErrors()) {
             return new ResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), result.getFieldError());
         }
 
-        if (!apiRestTemplate.validateApi(validateDto))
-            return new ResponseDto(HttpStatus.BAD_REQUEST.value());
+        if (!apiRestTemplate.validateApi(requestValidateDto))
+            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), new ResponseBNoDto(false));
 
-        return new ResponseDto(HttpStatus.OK.value());
+        return new ResponseDto(HttpStatus.OK.value(), new ResponseBNoDto(true));
     }
 }
