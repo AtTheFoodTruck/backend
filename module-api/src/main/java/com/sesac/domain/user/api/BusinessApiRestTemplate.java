@@ -54,7 +54,7 @@ public class BusinessApiRestTemplate {
         HttpEntity<ApiReqStatusDto> entity = new HttpEntity<>(apiReqStatusDto, new HttpHeaders());
 
         // Request API
-            ResponseEntity<String> response = restTemplate.exchange(uriComponents, HttpMethod.POST, entity, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(uriComponents, HttpMethod.POST, entity, String.class);
 
         // Json Parsing
         JSONParser jsonParser = new JSONParser();

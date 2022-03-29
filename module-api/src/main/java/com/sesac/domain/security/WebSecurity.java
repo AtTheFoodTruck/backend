@@ -61,10 +61,10 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 // request 처리
                 .and()
                     .authorizeRequests()
-                    .antMatchers("/users/join").permitAll()
-                    .antMatchers("/users/login").permitAll()
-                    .antMatchers("/managers/**").permitAll()
-                    .anyRequest().authenticated()
+                    .antMatchers("/**").permitAll()
+//                    .antMatchers("/login").permitAll()
+//                    .antMatchers("/managers/status").permitAll() // 사업자등록
+//                    .anyRequest().authenticated()
 
                 // 로그인
                 .and()
@@ -74,10 +74,5 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 // JwtSecurityConfig filter에 추가한걸 적용
                 .and()
                     .apply(new JwtSecurityConfig(tokenProvider, redisTemplate));
-
-//                .authorizeRequests().antMatchers("/**")
-//                .hasIpAddress("192.168.0.1")
-//                .and()
-//                .addFilter(getAuthenticationFilter());
     }
 }

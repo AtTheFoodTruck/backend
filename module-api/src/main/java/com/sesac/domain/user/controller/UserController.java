@@ -94,7 +94,7 @@ public class UserController {
      * 작성일 2022-03-27
     **/
     // 로그인
-    @PostMapping("/users/login")
+    @PostMapping("/login")
     public ResponseEntity<TokenDto> authorize(@RequestBody LoginUserDto requestUser) {
 
         UsernamePasswordAuthenticationToken authenticationToken =
