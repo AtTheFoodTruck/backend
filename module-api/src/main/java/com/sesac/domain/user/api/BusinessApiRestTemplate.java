@@ -4,19 +4,17 @@ import com.sesac.domain.user.api.dto.ApiReqStatusDto;
 import com.sesac.domain.user.api.dto.ApiReqValidateDto;
 import com.sesac.domain.user.dto.RequestStatusDto;
 import com.sesac.domain.user.dto.RequestValidateDto;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
 
 @Slf4j
 //@RequiredArgsConstructor
@@ -34,24 +32,29 @@ public class BusinessApiRestTemplate {
 
     /**
      * 사업자등록번호 상태조회 API
+     * Uri 수정 - jaemin
      * @author jjaen
      * @version 1.0.0
      * 작성일 2022/03/29
     **/
     public boolean statusApi(RequestStatusDto statusDto) {
         // UriComponents
-        UriComponents uriComponents = UriComponentsBuilder
-                .fromHttpUrl("https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey="+serviceKey)
-                .build();
+        URI uriComponents = UriComponentsBuilder
+                .fromHttpUrl("https://api.odcloud.kr/api/nts-businessman/v1/status")
+                .queryParam("serviceKey", "JyZTPPmD5XHt0PIhYecvp1xIsQj%2B1kU%2Btw4P%2Be2UHoqKCIdQ2gM5aQvJCGDrWh4LRE9fv7YOZIlNuj2o0asNDA%3D%3D")
+                .build(true)
+                .encode()
+                .toUri();
 
         // HttpEntity(body, header)
         ApiReqStatusDto apiReqStatusDto = ApiReqStatusDto.builder()
                                                         .bNo(statusDto.getBNo())
                                                         .build();
+
         HttpEntity<ApiReqStatusDto> entity = new HttpEntity<>(apiReqStatusDto, new HttpHeaders());
 
         // Request API
-        ResponseEntity<String> response = restTemplate.exchange(uriComponents.toString(), HttpMethod.POST, entity, String.class);
+            ResponseEntity<String> response = restTemplate.exchange(uriComponents, HttpMethod.POST, entity, String.class);
 
         // Json Parsing
         JSONParser jsonParser = new JSONParser();

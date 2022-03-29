@@ -1,17 +1,16 @@
-package com.sesac.domain.common;
+package com.sesac.domain.user.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
 
-@AllArgsConstructor
-@Getter
-public class UpdateTokenDto {
+@Getter @Setter
+public class LogoutUserDto {
+
     @NotBlank(message = "잘못된 요청입니다.")
     private String accessToken;
 
     @NotBlank(message = "잘못된 요청입니다.")
     private String refreshToken;
-
 }

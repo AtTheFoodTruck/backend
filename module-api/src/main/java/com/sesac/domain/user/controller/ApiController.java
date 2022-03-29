@@ -18,6 +18,11 @@ public class ApiController {
 
     private final BusinessApiRestTemplate apiRestTemplate;
 
+    @GetMapping("/health_check")
+    public String health() {
+        return "health_check";
+    }
+
     /**
      * 사업자등록번호 상태조회
      * @author jjaen
@@ -26,14 +31,18 @@ public class ApiController {
     **/
     @PostMapping("/status")
     public ResponseDto bNoStatus(@RequestBody RequestStatusDto statusDto) {
+//    public ResponseDto bNoStatus(@PathVariable("id") String id) {
+//            RequestStatusDto statusDto = new RequestStatusDto(id);
+
 //        if (result.hasErrors()) {
 //            return new ResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), result.getFieldError());
 //        }
 
-        if (!apiRestTemplate.statusApi(statusDto))
-            return new ResponseDto(HttpStatus.BAD_REQUEST.value());
+        if (!apiRestTemplate.statusApi(statusDto)){
+            return new ResponseDto(HttpStatus.OK.value(), "사업자 조회 실패");
+        }
 
-        return new ResponseDto(HttpStatus.OK.value());
+        return new ResponseDto(HttpStatus.OK.value(), "사업자 조회 성공");
     }
 
     /**

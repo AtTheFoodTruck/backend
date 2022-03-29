@@ -15,8 +15,8 @@ import javax.validation.constraints.NotBlank;
 @Data
 public class RequestUserDto {
 
+    @Email(message = "이메일 형식을 지켜주세요")
     @NotBlank(message = "이메일 정보는 필수입니다.")
-    @Email
     private String email;
 
     @NotBlank(message = "닉네임 정보는 필수입니다.")

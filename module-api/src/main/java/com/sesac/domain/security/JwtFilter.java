@@ -3,8 +3,10 @@ package com.sesac.domain.security;
 import com.sesac.domain.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -22,7 +24,7 @@ public class JwtFilter extends GenericFilterBean {
     public static final String AUTHORIZATION_HEADER = "Authorization";
 
     private final JwtTokenProvider jwtTokenProvider;
-//    private final TokenProvider tokenProvider;
+    private final RedisTemplate redisTemplate;
 
     // 토큰의 인증정보를 SecurityContext에 저장하는 역할 수행
     @Override
@@ -35,11 +37,16 @@ public class JwtFilter extends GenericFilterBean {
 
         // 유효성 검증
         if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
-            // authentication추출
-            Authentication authentication = jwtTokenProvider.getAuthentication(jwt);
-            // SecurityContext에 저장
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            log.info("Security Context에 '{}' 인증 정보를 저장했습니다, uri: {}", authentication.getName(), requestURI);
+
+            // Redis에 해당 accessToken logout 여부 확인
+            String isLogout = (String) redisTemplate.opsForValue().get(jwt);
+            if (ObjectUtils.isEmpty(isLogout)) {
+                // authentication추출
+                Authentication authentication = jwtTokenProvider.getAuthentication(jwt);
+                // SecurityContext에 저장
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.info("Security Context에 '{}' 인증 정보를 저장했습니다, uri: {}", authentication.getName(), requestURI);
+            }
         } else {
             log.info("유효한 JWT 토큰이 없습니다, uri: {}", requestURI);
         }

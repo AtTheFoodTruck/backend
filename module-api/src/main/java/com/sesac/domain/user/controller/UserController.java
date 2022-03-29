@@ -16,12 +16,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -46,20 +48,19 @@ public class UserController {
     **/
     @PostMapping("/users/join")
     public ResponseDto signUpUser(@Valid @RequestBody RequestUserDto userDto, BindingResult result) {
+
         // validation 검증
-        if (result.hasErrors()) {
-            return new ResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), result.getFieldError());
+        String errorMessage = result.getFieldErrors().stream()
+                .map(e -> e.getField())
+                .collect(Collectors.joining(","));
+
+        if (StringUtils.hasText(errorMessage)) {
+            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), errorMessage);
         }
 
         User joinUser = userService.signUpUser(userDto);
 
-        ResponseUserDto responseUserDto = ResponseUserDto.builder()
-                .username(joinUser.getUsername())
-                .email(joinUser.getEmail())
-                .phoneNum(joinUser.getPhoneNum())
-                .build();
-
-        return new ResponseDto(HttpStatus.CREATED.value(), responseUserDto);
+        return new ResponseDto(HttpStatus.CREATED.value(), new ResponseUserDto(joinUser));
     }
     
     /**
@@ -70,21 +71,19 @@ public class UserController {
     **/
     @PostMapping("/managers/join")
     public ResponseDto signUpManager(@Valid @RequestBody RequestManagerDto managerDto, BindingResult result) {
+
         // validation 검증
-        if (result.hasErrors()) {
-            return new ResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), result.getFieldError());
+        String errorMessage = result.getFieldErrors().stream()
+                .map(e -> e.getField())
+                .collect(Collectors.joining(","));
+
+        if (StringUtils.hasText(errorMessage)) {
+            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), errorMessage);
         }
 
         User joinManager = userService.signUpManager(managerDto);
 
-        ResponseUserDto responseUserDto = ResponseUserDto.builder()
-                .username(joinManager.getUsername())
-                .email(joinManager.getEmail())
-                .phoneNum(joinManager.getPhoneNum())
-                .bNo(joinManager.getBNo())
-                .build();
-
-        return new ResponseDto(HttpStatus.CREATED.value(), responseUserDto);
+        return new ResponseDto(HttpStatus.CREATED.value(), new ResponseUserDto(joinManager));
     }
 
     /**
@@ -111,7 +110,7 @@ public class UserController {
         String accessToken = jwtTokenProvider.createToken(authentication, false);
         String refreshToken = jwtTokenProvider.createToken(authentication, true);
 
-        // redis 에 저장
+        // redis에 저장
         redisService.setRefreshToken(requestUser.getEmail(), refreshToken);
 
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -122,57 +121,48 @@ public class UserController {
         return new ResponseEntity<>(new TokenDto(accessToken), httpHeaders, HttpStatus.OK);
     }
 
+    /**
+     * 로그아웃
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-29
+    **/
+    @PostMapping("/logout")
+    public ResponseDto logout(@Valid @RequestBody LogoutUserDto logoutDto, BindingResult result) {
+        // validation 검증
+        String errorMessage = result.getFieldErrors().stream()
+                .map(e -> e.getField())
+                .collect(Collectors.joining(","));
 
+        if (StringUtils.hasText(errorMessage)) {
+            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), errorMessage);
+        }
+
+        return new ResponseDto(HttpStatus.OK.value(), userService.logout(logoutDto));
+    }
+
+    /**
+     * access token 갱신
+     * 검증 로직 추가, 서비스로 로직 분리 - jaemin
+     * @author jjaen
+     * @version 1.0.0
+     * 작성일 2022-03-29
+    **/
     @PostMapping("/refresh")
-    public ResponseEntity<TokenDto> updateRefreshToken(@Valid @RequestBody UpdateTokenDto tokenDto, BindingResult result) {
-        if (result.hasErrors()) {
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity updateRefreshToken(@Valid @RequestBody UpdateTokenDto updateTokenDto, BindingResult result) {
+
+        // validation 검증
+        String errorMessage = result.getFieldErrors().stream()
+                .map(e -> e.getField())
+                .collect(Collectors.joining(","));
+
+        if (StringUtils.hasText(errorMessage)) {
+//            return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST.value());
+            throw new IllegalArgumentException("잘못된 요청입니다.");
         }
 
-        String accessToken = tokenDto.getAccessToken();
-        String refreshToken = tokenDto.getRefreshToken();
+        return userService.updateRefreshToken(updateTokenDto);
 
-        // refresh validation 체크
-        if (!jwtTokenProvider.validateToken(refreshToken)) {
-//            TODO error 처리
-        }
-
-        // refresh token validation 통과 시, email 추출
-        String email = (String) jwtTokenProvider.getUserParseInfo(refreshToken).get("email");
-
-
-        // email 없는 경우
-//        if (email == null) {
-//            TODO error 처리
-//            return new ResponseDto<>(new TokenDto(null), httpHeaders, HttpStatus.BAD_REQUEST);
-//        }
-
-
-        if( !StringUtils.hasText(email) ) {
-            throw new IllegalArgumentException(email);
-        }
-
-        // redis 에서 refresh token 가져옴
-        String refreshTokenFromDb = redisService.getRefreshToken(email);
-
-        // redis 에 저장된 refresh token 이 요청으로 들어온 token 과 동일한지 체크
-        if (!refreshToken.equals(refreshTokenFromDb)) {
-            // 잘못된 refresh token 이거나, 시간이 만료돼서 redis 에 refresh token 이 없거나(null)
-            // TODO error 처리
-        }
-
-        // refresh token 이 유효하고, redis 에 저장되어 있는 것과 동일한 경우
-        // 새로운 access token 발급
-        Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
-
-        String newAccessToken = jwtTokenProvider.createToken(authentication, false);
-
-        // 새로운 access token Headers 에 추가
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("Authorization", "Bearer " + newAccessToken);
-
-        // jwt 토큰 return                           body            header          status
-        return new ResponseEntity<>(new TokenDto(newAccessToken), httpHeaders, HttpStatus.OK);
     }
 
     /**
@@ -184,10 +174,13 @@ public class UserController {
      **/
     @PatchMapping("/name")
     public ResponseDto updateUsername(Principal principal,
-                                    @Valid @RequestBody UpdateUserDto updateUserDto,
-                                    BindingResult result) {
+                                      @Valid @RequestBody UpdateNameDto updateNameDto,
+                                      BindingResult result) {
+        if (result.hasErrors()) {
+            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), result.getFieldError());
+        }
 
-        User updatedInfo = userService.updateUsername(principal.getName(), updateUserDto);
+        User updatedInfo = userService.updateUsername(principal.getName(), updateNameDto);
 
         return new ResponseDto(HttpStatus.OK.value(), updatedInfo);
 
@@ -202,19 +195,40 @@ public class UserController {
     **/
     @PatchMapping("/password")
     public ResponseDto updatePassword(Principal principal,
-                                    @Valid @RequestBody UpdateUserDto updateUserDto,
-                                    BindingResult result) {
+                                      @Valid @RequestBody UpdatePwDto updatePwDto,
+                                      BindingResult result) {
+        if (result.hasErrors()) {
+            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), result.getFieldError());
+        }
 
-        userService.updatePassword(principal.getName(), updateUserDto);
+        userService.updatePassword(principal.getName(), updatePwDto);
 
-        return new ResponseDto(HttpStatus.OK.value());
-
+        return new ResponseDto(HttpStatus.OK.value(), "비밀번호 수정 성공");
     }
 
-//        String authority = user.getAuthorities().stream()
-//                .map(a -> a.getAuthorityName())
-//                .collect(Collectors.joining(","));
-//        if (authority.contains("ROLE_USER"))
-//        }
+    /**
+     * 이메일 중복 체크
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-29
+     **/
+    @PostMapping("/validation/email")
+    public ResponseDto validateDuplicateEmail(@RequestBody UserDto userDto) {
+
+        userService.validateDuplicateEmail(userDto.getEmail());
+        return new ResponseDto(HttpStatus.OK.value(), "이메일 중복 체크 성공");
+    }
+
+    /**
+     * 닉네임 중복 체크
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-29
+    **/
+    @PostMapping("/validation/name")
+    public ResponseDto validateDuplicateUsername(@RequestBody UserDto userDto) {
+        userService.validateDuplicateUser(userDto.getUsername());
+        return new ResponseDto(HttpStatus.OK.value(), "닉네임 중복 체크 성공");
+    }
 
 }

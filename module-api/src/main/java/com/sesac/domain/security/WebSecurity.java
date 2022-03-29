@@ -3,6 +3,7 @@ package com.sesac.domain.security;
 import com.sesac.domain.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -11,12 +12,15 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+
 @RequiredArgsConstructor
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true) //메서드 단위로 @PreAuthorize 검증 어노테이션을 사용하기 위함
 public class WebSecurity extends WebSecurityConfigurerAdapter {
 
     private final JwtTokenProvider tokenProvider;
+    private final RedisTemplate redisTemplate;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
@@ -41,26 +45,27 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint) // 401
                 .accessDeniedHandler(jwtAccessDeniedHandler) // 403 user -> adminPage access denied
-                
+
                 // h2-console 설정
                 .and()
                     .headers()
                     .frameOptions()
                     .sameOrigin()
-                
+
                 // 세션을 사용하기 않기에 세션 설정을 STATELESS로 지정
                 .and()
+                    .logout().disable()
                     .sessionManagement()
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                
+                    .sessionCreationPolicy(STATELESS)
+
                 // request 처리
                 .and()
                     .authorizeRequests()
                     .antMatchers("/users/join").permitAll()
                     .antMatchers("/users/login").permitAll()
-                    .antMatchers("/managers/status").permitAll()
+                    .antMatchers("/managers/**").permitAll()
                     .anyRequest().authenticated()
-                
+
                 // 로그인
                 .and()
                     .formLogin()
@@ -68,7 +73,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
                 // JwtSecurityConfig filter에 추가한걸 적용
                 .and()
-                    .apply(new JwtSecurityConfig(tokenProvider));
+                    .apply(new JwtSecurityConfig(tokenProvider, redisTemplate));
 
 //                .authorizeRequests().antMatchers("/**")
 //                .hasIpAddress("192.168.0.1")
