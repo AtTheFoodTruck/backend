@@ -14,6 +14,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
+
 @Slf4j
 //@RequiredArgsConstructor
 @Configuration
@@ -30,16 +32,19 @@ public class BusinessApiRestTemplate {
 
     /**
      * 사업자등록번호 상태조회 API
+     * Uri 수정 - jaemin
      * @author jjaen
      * @version 1.0.0
      * 작성일 2022/03/29
     **/
     public boolean statusApi(RequestStatusDto statusDto) {
         // UriComponents
-        UriComponents uriComponents = UriComponentsBuilder
+        URI uriComponents = UriComponentsBuilder
                 .fromHttpUrl("https://api.odcloud.kr/api/nts-businessman/v1/status")
                 .queryParam("serviceKey", "JyZTPPmD5XHt0PIhYecvp1xIsQj%2B1kU%2Btw4P%2Be2UHoqKCIdQ2gM5aQvJCGDrWh4LRE9fv7YOZIlNuj2o0asNDA%3D%3D")
-                .build(true);
+                .build(true)
+                .encode()
+                .toUri();
 
         // HttpEntity(body, header)
         ApiReqStatusDto apiReqStatusDto = ApiReqStatusDto.builder()
@@ -49,7 +54,7 @@ public class BusinessApiRestTemplate {
         HttpEntity<ApiReqStatusDto> entity = new HttpEntity<>(apiReqStatusDto, new HttpHeaders());
 
         // Request API
-            ResponseEntity<String> response = restTemplate.exchange(uriComponents.toUriString(), HttpMethod.POST, entity, String.class);
+            ResponseEntity<String> response = restTemplate.exchange(uriComponents, HttpMethod.POST, entity, String.class);
 
         // Json Parsing
         JSONParser jsonParser = new JSONParser();
