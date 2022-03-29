@@ -180,4 +180,20 @@ public class JwtTokenProvider implements Serializable, InitializingBean {
         return false;
     }
 
+    /**
+     * AccessToken의 남은 유효시간 반환
+     *
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-29
+     **/
+    public Long getExpiration(String accessToken) {
+        // accessToken 남은 유효시간
+        Date expiration = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody().getExpiration();
+
+        // 현재 시간
+        Long now = new Date().getTime();
+        return (expiration.getTime() - now);
+    }
+
 }

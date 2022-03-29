@@ -1,16 +1,18 @@
 package com.sesac.domain.user.service;
 
+import com.sesac.domain.common.ResponseDto;
 import com.sesac.domain.exception.DuplicateUsernameException;
-import com.sesac.domain.user.dto.RequestManagerDto;
-import com.sesac.domain.user.dto.RequestUserDto;
-import com.sesac.domain.user.dto.UpdatePwDto;
-import com.sesac.domain.user.dto.UpdateNameDto;
+import com.sesac.domain.jwt.JwtTokenProvider;
+import com.sesac.domain.user.dto.*;
 import com.sesac.domain.user.entity.Authority;
 import com.sesac.domain.user.entity.User;
 import com.sesac.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -27,6 +30,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final RedisTemplate redisTemplate;
 
     /**
      * 개인 회원 회원가입
@@ -167,6 +172,35 @@ public class UserService {
         if (findUsers > 0) {
             throw new DuplicateUsernameException("닉네임이 중복되었습니다");
         }
+    }
+
+    /**
+     * 로그아웃
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-29
+    **/
+    public ResponseDto logout(LogoutUserDto logoutDto) {
+        // 1. AccessToken 검증
+        if (!jwtTokenProvider.validateToken(logoutDto.getAccessToken())) {
+            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), "잘못된 요청입니다.");
+        }
+
+        // 2. AccessToken에서 email을 가져옴
+        Authentication authentication = jwtTokenProvider.getAuthentication(logoutDto.getAccessToken());
+
+        // 3. Redis에서 해당 email로 저장된 Refresh Token이 있는지 여부를 확인 후 있을 경우 삭제
+        if (redisTemplate.opsForValue().get("email:" + authentication.getName()) != null) {
+            // Refresh Token 삭제
+            redisTemplate.delete("email:" + authentication.getName());
+        }
+
+        // 4. 해당 AccessToken 유효시간을 갖고와서 BlackList로 저장
+        Long expiration = jwtTokenProvider.getExpiration(logoutDto.getAccessToken());
+        redisTemplate.opsForValue()
+                .set(logoutDto.getAccessToken(), "logout", expiration, TimeUnit.MILLISECONDS);
+
+        return new ResponseDto(HttpStatus.OK.value(), "로그아웃 되었습니다.");
     }
 
     /**

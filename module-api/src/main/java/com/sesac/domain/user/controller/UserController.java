@@ -121,6 +121,26 @@ public class UserController {
     }
 
     /**
+     * 로그아웃
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-29
+    **/
+    @PostMapping("/logout")
+    public ResponseDto logout(@Valid @RequestBody LogoutUserDto logoutDto, BindingResult result) {
+        // validation 검증
+        String errorMessage = result.getFieldErrors().stream()
+                .map(e -> e.getField())
+                .collect(Collectors.joining(","));
+
+        if (StringUtils.hasText(errorMessage)) {
+            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), errorMessage);
+        }
+
+        return new ResponseDto(HttpStatus.OK.value(), userService.logout(logoutDto));
+    }
+
+    /**
      * access token 갱신
      * @author jjaen
      * @version 1.0.0
