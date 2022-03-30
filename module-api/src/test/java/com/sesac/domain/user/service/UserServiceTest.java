@@ -1,6 +1,6 @@
 package com.sesac.domain.user.service;
 
-import com.sesac.domain.user.dto.request.JoinUserDto;
+import com.sesac.domain.user.dto.request.UserRequestDto;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ public class UserServiceTest {
     @Test
     public void 회원가입() {
         //given
-        JoinUserDto member = JoinUserDto.builder()
+        UserRequestDto.JoinUserDto member = UserRequestDto.JoinUserDto.builder()
                 .email("jaemin@naver.com")
                 .username("jaemin")
                 .password(passwordEncoder.encode("kadslfjiew"))
