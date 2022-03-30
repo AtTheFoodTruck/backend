@@ -136,17 +136,14 @@ public class JwtTokenProvider implements Serializable, InitializingBean {
 
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("잘못된 JWT 서명입니다.");
-            return false;
         } catch (ExpiredJwtException e) {
             log.info("만료된 JWT 토큰입니다.");
-            return false;
         } catch (UnsupportedJwtException e) {
             log.info("지원되지 않는 JWT 토큰입니다.");
-            return false;
         } catch (IllegalArgumentException e) {
             log.info("JWT 토큰이 잘못되었습니다.");
-            return false;
         }
+        return false;
     }
 
     /**
