@@ -2,7 +2,7 @@ package com.sesac.domain.user.api.dto;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.sesac.domain.user.dto.request.BNoValidateDto;
+import com.sesac.domain.user.dto.request.BNoApiRequestDto;
 import lombok.Builder;
 
 import java.util.ArrayList;
@@ -17,10 +17,10 @@ import java.util.List;
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class ApiReqValidateDto {
 
-    private List<BNoValidateDto> businesses = new ArrayList<>();  // 사업자 등록 번호
+    private List<BNoApiRequestDto.BNoValidateDto> businesses = new ArrayList<>();  // 사업자 등록 번호
 
     @Builder
-    public ApiReqValidateDto(BNoValidateDto validateDto) {
+    public ApiReqValidateDto(BNoApiRequestDto.BNoValidateDto validateDto) {
         this.businesses.add(validateDto);
     }
 }

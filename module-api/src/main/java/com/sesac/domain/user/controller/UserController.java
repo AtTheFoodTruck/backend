@@ -4,12 +4,8 @@ import com.sesac.domain.common.ResponseDto;
 import com.sesac.domain.common.TokenDto;
 import com.sesac.domain.common.UpdateTokenDto;
 import com.sesac.domain.user.dto.*;
-import com.sesac.domain.user.dto.request.JoinManagerDto;
-import com.sesac.domain.user.dto.request.LoginUserDto;
-import com.sesac.domain.user.dto.request.LogoutUserDto;
-import com.sesac.domain.user.dto.request.UpdatePwDto;
-import com.sesac.domain.user.dto.response.JoinUserDto;
-import com.sesac.domain.user.dto.request.UpdateNameDto;
+import com.sesac.domain.user.dto.request.*;
+import com.sesac.domain.user.dto.response.UserResponseDto;
 import com.sesac.domain.user.entity.User;
 import com.sesac.domain.user.service.UserService;
 import com.sesac.domain.jwt.JwtTokenProvider;
@@ -54,7 +50,7 @@ public class UserController {
      * 작성일 2022-03-26
     **/
     @PostMapping("/users/join")
-    public ResponseDto signUpUser(@Valid @RequestBody com.sesac.domain.user.dto.request.JoinUserDto userDto, BindingResult result) {
+    public ResponseDto signUpUser(@Valid @RequestBody UserRequestDto.JoinUserDto userDto, BindingResult result) {
 
         // validation 검증
         String errorMessage = result.getFieldErrors().stream()
@@ -77,7 +73,7 @@ public class UserController {
      * 작성일 2022-03-29
     **/
     @PostMapping("/managers/join")
-    public ResponseDto signUpManager(@Valid @RequestBody JoinManagerDto managerDto, BindingResult result) {
+    public ResponseDto signUpManager(@Valid @RequestBody UserRequestDto.JoinManagerDto managerDto, BindingResult result) {
 
         // validation 검증
         String errorMessage = result.getFieldErrors().stream()
@@ -90,7 +86,7 @@ public class UserController {
 
         User joinManager = userService.signUpManager(managerDto);
 
-        return new ResponseDto(HttpStatus.CREATED.value(), new JoinUserDto(joinManager));
+        return new ResponseDto(HttpStatus.CREATED.value(), new UserResponseDto.JoinUserDto(joinManager));
     }
 
     /**
@@ -102,7 +98,7 @@ public class UserController {
     **/
     // 로그인
     @PostMapping("/logins")
-    public ResponseEntity<TokenDto> authorize(@RequestBody LoginUserDto requestUser) {
+    public ResponseEntity<TokenDto> authorize(@RequestBody UserRequestDto.LoginUserDto requestUser) {
 
         log.info("로그인 request");
 
@@ -137,7 +133,7 @@ public class UserController {
      * 작성일 2022-03-29
     **/
     @PostMapping("/logout")
-    public ResponseDto logout(@Valid @RequestBody LogoutUserDto logoutDto, BindingResult result) {
+    public ResponseDto logout(@Valid @RequestBody UserRequestDto.LogoutUserDto logoutDto, BindingResult result) {
         // validation 검증
         String errorMessage = result.getFieldErrors().stream()
                 .map(e -> e.getField())
@@ -183,7 +179,7 @@ public class UserController {
      **/
     @PatchMapping("/name")
     public ResponseDto updateUsername(Principal principal,
-                                      @Valid @RequestBody UpdateNameDto updateNameDto,
+                                      @Valid @RequestBody UserRequestDto.UpdateNameDto updateNameDto,
                                       BindingResult result) {
         if (result.hasErrors()) {
             return new ResponseDto(HttpStatus.BAD_REQUEST.value(), result.getFieldError());
@@ -204,7 +200,7 @@ public class UserController {
     **/
     @PatchMapping("/password")
     public ResponseDto updatePassword(Principal principal,
-                                      @Valid @RequestBody UpdatePwDto updatePwDto,
+                                      @Valid @RequestBody UserRequestDto.UpdatePwDto updatePwDto,
                                       BindingResult result) {
         if (result.hasErrors()) {
             return new ResponseDto(HttpStatus.BAD_REQUEST.value(), result.getFieldError());

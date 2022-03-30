@@ -6,11 +6,7 @@ import com.sesac.domain.common.UpdateTokenDto;
 import com.sesac.domain.exception.DuplicateUsernameException;
 import com.sesac.domain.jwt.JwtTokenProvider;
 import com.sesac.domain.redis.RedisService;
-import com.sesac.domain.user.dto.request.JoinManagerDto;
-import com.sesac.domain.user.dto.request.JoinUserDto;
-import com.sesac.domain.user.dto.request.LogoutUserDto;
-import com.sesac.domain.user.dto.request.UpdatePwDto;
-import com.sesac.domain.user.dto.request.UpdateNameDto;
+import com.sesac.domain.user.dto.request.*;
 import com.sesac.domain.user.entity.Authority;
 import com.sesac.domain.user.entity.User;
 import com.sesac.domain.user.repository.UserRepository;
@@ -29,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import javax.validation.Valid;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
@@ -49,10 +46,11 @@ public class UserService {
      * @author jaemin
      * @version 1.0.0
      * 작성일 2022-03-28
-    **/
+    *
+     * @param user*/
     @Transactional
 //    public User signUpUser(RequestUserDto user) {
-    public ResponseDto signUpUser(JoinUserDto user) {
+    public ResponseDto signUpUser(@Valid UserRequestDto.JoinUserDto user) {
         // 중복회원 검증
 //        validateDuplicateUser(user.getUsername());
 
@@ -85,9 +83,10 @@ public class UserService {
      * @author jaemin
      * @version 1.0.0
      * 작성일 2022-03-29
-     **/
+     *
+     * @param manager*/
     @Transactional
-    public User signUpManager(JoinManagerDto manager) {
+    public User signUpManager(@Valid UserRequestDto.JoinManagerDto manager) {
         // 중복 체크
         validateDuplicateUser(manager.getUsername());
         validateDuplicateEmail(manager.getEmail());
@@ -130,7 +129,7 @@ public class UserService {
      * 작성일 2022-03-28
     **/
     @Transactional
-    public User updateUsername(String email, UpdateNameDto updateNameDto) {
+    public User updateUsername(String email, UserRequestDto.UpdateNameDto updateNameDto) {
         // 요청 유저 정보 조회
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("해당하는 유저를 찾을 수 없습니다."));
 
@@ -148,7 +147,7 @@ public class UserService {
      * 작성일 2022-03-29
     **/
     @Transactional
-    public void updatePassword(String email, UpdatePwDto updatePwDto) {
+    public void updatePassword(String email, UserRequestDto.UpdatePwDto updatePwDto) {
         // 요청 유저 정보 조회
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("해당하는 유저를 찾을 수 없습니다."));
 
@@ -195,7 +194,7 @@ public class UserService {
      * @version 1.0.0
      * 작성일 2022-03-29
     **/
-    public ResponseDto logout(LogoutUserDto logoutDto) {
+    public ResponseDto logout(UserRequestDto.LogoutUserDto logoutDto) {
         // 1. AccessToken 검증
         if (!jwtTokenProvider.validateToken(logoutDto.getAccessToken())) {
             return new ResponseDto(HttpStatus.BAD_REQUEST.value(), "잘못된 요청입니다.");
