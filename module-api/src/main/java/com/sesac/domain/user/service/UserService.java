@@ -144,7 +144,11 @@ public class UserService {
         if (StringUtils.hasText(updateNameDto.getUsername())) {
             user.changeUser(updateNameDto.getUsername());
         }
-        return response.success(user, "닉네임 수정이 완료되었습니다.", HttpStatus.OK);
+
+        UserRequestDto.UpdateNameDto nameDto = new UserRequestDto.UpdateNameDto();
+        nameDto.setUsername(user.getUsername());
+
+        return response.success(nameDto, "닉네임 수정이 완료되었습니다.", HttpStatus.OK);
     }
 
     /**

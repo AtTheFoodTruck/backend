@@ -44,7 +44,7 @@ spring:
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
             - name: JwtAuthentication
               args:
-                role: ROLE_USER
+                roles: ROLE_USER
         # 회원정보 수정, 회원정보 삭제
         - id: user-service
           uri: lb://USER-SERVICE
@@ -56,19 +56,19 @@ spring:
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
             - name: JwtAuthentication
               args:
-                role: ROLE_USER,ROLE_MANAGER
+                roles: ROLE_USER,ROLE_MANAGER
         # 매니저 서비스
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/user-service/managers/**
+            - Path=/user-service/managers/status
             - Method=POST
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
             - name: JwtAuthentication
               args:
-                role: ROLE_MANAGER
+                roles: ROLE_MANAGER
 
   # redis 설정
 #  redis:
