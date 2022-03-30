@@ -2,9 +2,9 @@ package com.sesac.domain.user.controller;
 
 import com.sesac.domain.common.ResponseDto;
 import com.sesac.domain.user.api.BusinessApiRestTemplate;
-import com.sesac.domain.user.dto.RequestStatusDto;
-import com.sesac.domain.user.dto.RequestValidateDto;
-import com.sesac.domain.user.dto.ResponseBNoDto;
+import com.sesac.domain.user.dto.request.BNoStatusDto;
+import com.sesac.domain.user.dto.request.BNoValidateDto;
+import com.sesac.domain.user.dto.response.BNoDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
@@ -31,7 +31,7 @@ public class ApiController {
      * 작성일 2022/03/29
     **/
     @PostMapping("/status")
-    public ResponseDto bNoStatus(@RequestBody RequestStatusDto statusDto) {
+    public ResponseDto bNoStatus(@RequestBody BNoStatusDto statusDto) {
 //    public ResponseDto bNoStatus(@PathVariable("id") String id) {
 //            RequestStatusDto statusDto = new RequestStatusDto(id);
 
@@ -40,10 +40,10 @@ public class ApiController {
 //        }
 
         if (!apiRestTemplate.statusApi(statusDto)){
-            return new ResponseDto(HttpStatus.OK.value(), new ResponseBNoDto(false));
+            return new ResponseDto(HttpStatus.OK.value(), new BNoDto(false));
         }
 
-        return new ResponseDto(HttpStatus.OK.value(), new ResponseBNoDto(true));
+        return new ResponseDto(HttpStatus.OK.value(), new BNoDto(true));
     }
 
     /**
@@ -53,14 +53,14 @@ public class ApiController {
      * 작성일 2022/03/29
     **/
     @PostMapping("/validate")
-    public ResponseDto bNoValidate(@Valid @RequestBody RequestValidateDto requestValidateDto, BindingResult result) {
+    public ResponseDto bNoValidate(@Valid @RequestBody BNoValidateDto BNoValidateDto, BindingResult result) {
         if (result.hasErrors()) {
             return new ResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), result.getFieldError());
         }
 
-        if (!apiRestTemplate.validateApi(requestValidateDto))
-            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), new ResponseBNoDto(false));
+        if (!apiRestTemplate.validateApi(BNoValidateDto))
+            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), new BNoDto(false));
 
-        return new ResponseDto(HttpStatus.OK.value(), new ResponseBNoDto(true));
+        return new ResponseDto(HttpStatus.OK.value(), new BNoDto(true));
     }
 }

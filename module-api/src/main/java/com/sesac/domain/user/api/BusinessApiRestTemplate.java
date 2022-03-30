@@ -2,8 +2,8 @@ package com.sesac.domain.user.api;
 
 import com.sesac.domain.user.api.dto.ApiReqStatusDto;
 import com.sesac.domain.user.api.dto.ApiReqValidateDto;
-import com.sesac.domain.user.dto.RequestStatusDto;
-import com.sesac.domain.user.dto.RequestValidateDto;
+import com.sesac.domain.user.dto.request.BNoStatusDto;
+import com.sesac.domain.user.dto.request.BNoValidateDto;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -37,7 +37,7 @@ public class BusinessApiRestTemplate {
      * @version 1.0.0
      * 작성일 2022/03/29
     **/
-    public boolean statusApi(RequestStatusDto statusDto) {
+    public boolean statusApi(BNoStatusDto statusDto) {
         // UriComponents
         URI uriComponents = UriComponentsBuilder
                 .fromHttpUrl("https://api.odcloud.kr/api/nts-businessman/v1/status")
@@ -79,7 +79,7 @@ public class BusinessApiRestTemplate {
      * @version 1.0.0
      * 작성일 2022/03/29
     **/
-    public boolean validateApi(RequestValidateDto validateDto) {
+    public boolean validateApi(BNoValidateDto validateDto) {
         UriComponents uriComponents = UriComponentsBuilder
                 .fromHttpUrl("https://api.odcloud.kr/api/nts-businessman/v1/validate?serviceKey="+serviceKey)
                 .build();

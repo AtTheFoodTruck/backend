@@ -1,4 +1,4 @@
-package com.sesac.domain.user.dto;
+package com.sesac.domain.user.dto.request;
 
 import lombok.Getter;
 import lombok.Setter;

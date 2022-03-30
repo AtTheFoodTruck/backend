@@ -1,4 +1,4 @@
-package com.sesac.domain.user.dto;
+package com.sesac.domain.user.dto.request;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -16,7 +16,7 @@ import javax.validation.constraints.NotBlank;
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
 @AllArgsConstructor
 @NoArgsConstructor
-public class RequestValidateDto {
+public class BNoValidateDto {
     @NotBlank(message = "사업자 등록번호는 필수입니다.")
     private String bNo;                         // 사업자 등록 번호
     @NotBlank(message = "개업일은 필수입니다.")

@@ -6,7 +6,11 @@ import com.sesac.domain.common.UpdateTokenDto;
 import com.sesac.domain.exception.DuplicateUsernameException;
 import com.sesac.domain.jwt.JwtTokenProvider;
 import com.sesac.domain.redis.RedisService;
-import com.sesac.domain.user.dto.*;
+import com.sesac.domain.user.dto.request.JoinManagerDto;
+import com.sesac.domain.user.dto.request.JoinUserDto;
+import com.sesac.domain.user.dto.request.LogoutUserDto;
+import com.sesac.domain.user.dto.request.UpdatePwDto;
+import com.sesac.domain.user.dto.request.UpdateNameDto;
 import com.sesac.domain.user.entity.Authority;
 import com.sesac.domain.user.entity.User;
 import com.sesac.domain.user.repository.UserRepository;
@@ -47,12 +51,15 @@ public class UserService {
      * 작성일 2022-03-28
     **/
     @Transactional
-    public User signUpUser(RequestUserDto user) {
+//    public User signUpUser(RequestUserDto user) {
+    public ResponseDto signUpUser(JoinUserDto user) {
         // 중복회원 검증
-        validateDuplicateUser(user.getEmail());
+//        validateDuplicateUser(user.getUsername());
 
         if (userRepository.findByUsername(user.getUsername()).orElse(null) != null) {
-            throw new RuntimeException("이미 가입되어 있는 유저입니다.");
+//            throw new RuntimeException("이미 가입되어 있는 유저입니다.");
+//            throw new DuplicateUsernameException("이미 가입되어 있는 유저입니다.");
+            return new ResponseDto(HttpStatus.BAD_REQUEST.value(),"이미 가입되어 있는 유저입니다.");
         }
 
         // User 권한 생성
@@ -68,7 +75,8 @@ public class UserService {
                 .activated(true)
                 .build();
 
-        return userRepository.save(createdUser);
+        // TODO responseDto 의 data 에 UserEntity 를 넘겨주면 필요 없는 값까지 모두 response 로 떨어짐 -> 수정 필요
+        return new ResponseDto(HttpStatus.OK.value(), userRepository.save(createdUser));
     }
 
     // TODO 점주에는 가게 정보까지 저장?
@@ -79,7 +87,7 @@ public class UserService {
      * 작성일 2022-03-29
      **/
     @Transactional
-    public User signUpManager(RequestManagerDto manager) {
+    public User signUpManager(JoinManagerDto manager) {
         // 중복 체크
         validateDuplicateUser(manager.getUsername());
         validateDuplicateEmail(manager.getEmail());
@@ -246,7 +254,7 @@ public class UserService {
         httpHeaders.add("Authorization", "Bearer " + newAccessToken);
 
         // jwt 토큰 return                           body            header          status
-        return new ResponseEntity<>(new TokenDto(newAccessToken), httpHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(new TokenDto(newAccessToken, refreshToken), httpHeaders, HttpStatus.OK);
     }
 
     /**
