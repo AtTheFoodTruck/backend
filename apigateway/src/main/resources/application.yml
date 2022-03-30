@@ -28,7 +28,7 @@ spring:
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/user-service/login, /user-service/users/join, /user-service/validation/**
+            - Path=/user-service/logins,/user-service/users/join,/user-service/managers/join,/user-service/validation/**
             - Method=POST
           filters:
             - RemoveRequestHeader=Cookie
@@ -49,7 +49,7 @@ spring:
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/user-service/name, /user-service/password, /user-service/mypage
+            - Path=/user-service/name,/user-service/password,/user-service/mypage
             - Method=PATCH,DELETE
           filters:
             - RemoveRequestHeader=Cookie

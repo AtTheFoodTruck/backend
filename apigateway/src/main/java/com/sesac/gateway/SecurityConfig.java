@@ -18,7 +18,7 @@ public class SecurityConfig {
                 .pathMatchers(
                         "/user-service/users/join",
                         "/user-service/managers/join",
-                        "/user-service/login",
+                        "/user-service/logins",
                         "/user-service/validation/email",
                         "/user-service/validation/name").permitAll()
 //                .anyExchange().authenticated().and()
