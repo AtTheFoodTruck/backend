@@ -21,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -36,6 +37,7 @@ public class UserController {
     private final UserService userService;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final RedisService redisService;
+    private final Response response;
 
 
     @GetMapping("/welcome")
@@ -53,17 +55,11 @@ public class UserController {
     public ResponseDto signUpUser(@Valid @RequestBody UserRequestDto.JoinUserDto userDto, BindingResult result) {
 
         // validation 검증
-        String errorMessage = result.getFieldErrors().stream()
-                .map(e -> e.getField())
-                .collect(Collectors.joining(","));
-
-        if (StringUtils.hasText(errorMessage)) {
-            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), errorMessage);
+        if (results.hasErrors()) {
+            return response.invalidFields(Helper.refineErrors(results));
         }
 
-        return new ResponseDto(HttpStatus.CREATED.value(), userService.signUpUser(userDto));
-
-//        return new ResponseDto(HttpStatus.CREATED.value(), new ResponseUserDto(joinUser));
+        return userService.signUpUser(userDto);
     }
     
     /**

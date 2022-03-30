@@ -40,6 +40,7 @@ public class UserService {
     private final JwtTokenProvider jwtTokenProvider;
     private final RedisTemplate redisTemplate;
     private final RedisService redisService;
+    private final Response response;
 
     /**
      * 개인 회원 회원가입
@@ -50,14 +51,12 @@ public class UserService {
      * @param user*/
     @Transactional
 //    public User signUpUser(RequestUserDto user) {
-    public ResponseDto signUpUser(@Valid UserRequestDto.JoinUserDto user) {
+    public ResponseEntity<?> signUpUser(JoinUserDto user) {
         // 중복회원 검증
 //        validateDuplicateUser(user.getUsername());
 
         if (userRepository.findByUsername(user.getUsername()).orElse(null) != null) {
-//            throw new RuntimeException("이미 가입되어 있는 유저입니다.");
-//            throw new DuplicateUsernameException("이미 가입되어 있는 유저입니다.");
-            return new ResponseDto(HttpStatus.BAD_REQUEST.value(),"이미 가입되어 있는 유저입니다.");
+            return response.fail("이미 가입되어 있는 유저입니다.", HttpStatus.BAD_REQUEST);
         }
 
         // User 권한 생성
@@ -73,8 +72,12 @@ public class UserService {
                 .activated(true)
                 .build();
 
-        // TODO responseDto 의 data 에 UserEntity 를 넘겨주면 필요 없는 값까지 모두 response 로 떨어짐 -> 수정 필요
-        return new ResponseDto(HttpStatus.OK.value(), userRepository.save(createdUser));
+        // User 객체 생성
+        User savedUser = userRepository.save(createdUser);
+
+        return response.success(new RsJoinUserDto(savedUser), "회원가입에 성공했습니다.", HttpStatus.CREATED);
+
+//        return new ResponseDto(HttpStatus.OK.value(), new RsJoinUserDto(savedUser));
     }
 
     // TODO 점주에는 가게 정보까지 저장?
