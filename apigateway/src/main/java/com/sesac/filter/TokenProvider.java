@@ -1,7 +1,12 @@
 package com.sesac.filter;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.cfg.Environment;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,15 +20,28 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class TokenProvider {
-    private static final long serialVersionUID = -2550185165626007488L;
+public class TokenProvider implements InitializingBean {
 
     private static final String AUTHORITIES_KEY = "auth";
 
     private static final long JWT_ACCESS_TOKEN_VALIDITY = 60 * 30; // 30 minutes
     private static final long JWT_REFRESH_TOKEN_VALIDITY = 60 * 60 * 24 * 7; // 1 week
 
+
+    private String secret;
     private Key key;
+
+    public TokenProvider(
+            @Value("${jwt.secret}") String secret
+    ) {
+        this.secret = secret;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        this.key = Keys.hmacShaKeyFor(keyBytes);
+    }
 
     /**
      * token 의 모든 claim 반환
@@ -162,5 +180,6 @@ public class TokenProvider {
         }
         return false;
     }
+
 
 }
