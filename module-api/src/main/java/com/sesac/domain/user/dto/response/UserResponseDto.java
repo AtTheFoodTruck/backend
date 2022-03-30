@@ -30,6 +30,7 @@ public class UserResponseDto {
             this.username = joinMember.getUsername();
             this.email = joinMember.getEmail();
             this.phoneNum = joinMember.getPhoneNum();
+            this.bNo = joinMember.getBNo();
         }
     }
 }

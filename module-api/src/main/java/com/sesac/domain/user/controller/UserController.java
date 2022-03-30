@@ -5,7 +5,6 @@ import com.sesac.domain.common.TokenDto;
 import com.sesac.domain.common.UpdateTokenDto;
 import com.sesac.domain.user.dto.*;
 import com.sesac.domain.user.dto.request.*;
-import com.sesac.domain.user.dto.response.UserResponseDto;
 import com.sesac.domain.user.entity.User;
 import com.sesac.domain.user.service.UserService;
 import com.sesac.domain.jwt.JwtTokenProvider;
@@ -19,13 +18,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -36,6 +33,7 @@ public class UserController {
     private final UserService userService;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final RedisService redisService;
+    private final Response response;
 
 
     @GetMapping("/welcome")
@@ -50,22 +48,18 @@ public class UserController {
      * 작성일 2022-03-26
     **/
     @PostMapping("/users/join")
-    public ResponseDto signUpUser(@Valid @RequestBody UserRequestDto.JoinUserDto userDto, BindingResult result) {
+    public ResponseEntity<?> signUpUser(@Valid @RequestBody UserRequestDto.JoinUserDto userDto, BindingResult results) {
+
+        log.info("개인 회원가입");
 
         // validation 검증
-        String errorMessage = result.getFieldErrors().stream()
-                .map(e -> e.getField())
-                .collect(Collectors.joining(","));
-
-        if (StringUtils.hasText(errorMessage)) {
-            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), errorMessage);
+        if (results.hasErrors()) {
+            return response.invalidFields(Helper.refineErrors(results));
         }
 
-        return new ResponseDto(HttpStatus.CREATED.value(), userService.signUpUser(userDto));
-
-//        return new ResponseDto(HttpStatus.CREATED.value(), new ResponseUserDto(joinUser));
+        return userService.signUpUser(userDto);
     }
-    
+
     /**
      * 점주 회원가입
      * @author jaemin
@@ -73,20 +67,16 @@ public class UserController {
      * 작성일 2022-03-29
     **/
     @PostMapping("/managers/join")
-    public ResponseDto signUpManager(@Valid @RequestBody UserRequestDto.JoinManagerDto managerDto, BindingResult result) {
+    public ResponseEntity<?> signUpManager(@Valid @RequestBody UserRequestDto.JoinManagerDto managerDto, BindingResult results) {
+
+        log.info("점주 회원가입");
 
         // validation 검증
-        String errorMessage = result.getFieldErrors().stream()
-                .map(e -> e.getField())
-                .collect(Collectors.joining(","));
-
-        if (StringUtils.hasText(errorMessage)) {
-            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), errorMessage);
+        if (results.hasErrors()) {
+            return response.invalidFields(Helper.refineErrors(results));
         }
 
-        User joinManager = userService.signUpManager(managerDto);
-
-        return new ResponseDto(HttpStatus.CREATED.value(), new UserResponseDto.JoinUserDto(joinManager));
+        return userService.signUpManager(managerDto);
     }
 
     /**
@@ -98,7 +88,7 @@ public class UserController {
     **/
     // 로그인
     @PostMapping("/logins")
-    public ResponseEntity<TokenDto> authorize(@RequestBody UserRequestDto.LoginUserDto requestUser) {
+    public ResponseEntity<?> authorize(@RequestBody UserRequestDto.LoginUserDto requestUser) {
 
         log.info("로그인 request");
 
@@ -119,11 +109,13 @@ public class UserController {
         redisService.setRefreshToken(requestUser.getEmail(), refreshToken);
 
         HttpHeaders httpHeaders = new HttpHeaders();
+
         // Header에 추가
         httpHeaders.add("Authorization", "Bearer " + accessToken);
 
-        // jwt토큰 return                           body            header          status
-        return new ResponseEntity<>(new TokenDto(accessToken, refreshToken), httpHeaders, HttpStatus.OK);
+        // jwt토큰
+        return response.successToken(new TokenDto(accessToken, refreshToken), httpHeaders, HttpStatus.OK);
+//        return new ResponseEntity<>(new TokenDto(accessToken, refreshToken), httpHeaders, HttpStatus.OK);
     }
 
     /**
@@ -133,17 +125,16 @@ public class UserController {
      * 작성일 2022-03-29
     **/
     @PostMapping("/logout")
-    public ResponseDto logout(@Valid @RequestBody UserRequestDto.LogoutUserDto logoutDto, BindingResult result) {
-        // validation 검증
-        String errorMessage = result.getFieldErrors().stream()
-                .map(e -> e.getField())
-                .collect(Collectors.joining(","));
+    public ResponseEntity<?> logout(@Valid @RequestBody UserRequestDto.LogoutUserDto logoutDto, BindingResult results) {
 
-        if (StringUtils.hasText(errorMessage)) {
-            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), errorMessage);
+        log.info("로그아웃");
+
+        // validation 검증
+        if (results.hasErrors()) {
+            return response.invalidFields(Helper.refineErrors(results));
         }
 
-        return new ResponseDto(HttpStatus.OK.value(), userService.logout(logoutDto));
+        return userService.logout(logoutDto);
     }
 
     /**
@@ -154,16 +145,13 @@ public class UserController {
      * 작성일 2022-03-29
     **/
     @PostMapping("/refresh")
-    public ResponseEntity updateRefreshToken(@Valid @RequestBody UpdateTokenDto updateTokenDto, BindingResult result) {
+    public ResponseEntity<?> updateRefreshToken(@Valid @RequestBody UpdateTokenDto updateTokenDto, BindingResult results) {
+
+        log.info("Access Token 갱신");
 
         // validation 검증
-        String errorMessage = result.getFieldErrors().stream()
-                .map(e -> e.getField())
-                .collect(Collectors.joining(","));
-
-        if (StringUtils.hasText(errorMessage)) {
-//            return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST.value());
-            throw new IllegalArgumentException("잘못된 요청입니다.");
+        if (results.hasErrors()) {
+            return response.invalidFields(Helper.refineErrors(results));
         }
 
         return userService.updateRefreshToken(updateTokenDto);
@@ -178,17 +166,17 @@ public class UserController {
      * 작성일 2022-03-28
      **/
     @PatchMapping("/name")
-    public ResponseDto updateUsername(Principal principal,
+    public ResponseEntity<?> updateUsername(Principal principal,
                                       @Valid @RequestBody UserRequestDto.UpdateNameDto updateNameDto,
-                                      BindingResult result) {
-        if (result.hasErrors()) {
-            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), result.getFieldError());
+                                      BindingResult results) {
+        log.info("회원정보수정 - 닉네임");
+
+        // validation 검증
+        if (results.hasErrors()) {
+            return response.invalidFields(Helper.refineErrors(results));
         }
 
-        User updatedInfo = userService.updateUsername(principal.getName(), updateNameDto);
-
-        return new ResponseDto(HttpStatus.OK.value(), updatedInfo);
-
+        return userService.updateUsername(principal.getName(), updateNameDto);
     }
 
     /**
@@ -199,16 +187,17 @@ public class UserController {
      * 작성일 2022-03-29
     **/
     @PatchMapping("/password")
-    public ResponseDto updatePassword(Principal principal,
+    public ResponseEntity<?> updatePassword(Principal principal,
                                       @Valid @RequestBody UserRequestDto.UpdatePwDto updatePwDto,
-                                      BindingResult result) {
-        if (result.hasErrors()) {
-            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), result.getFieldError());
+                                      BindingResult results) {
+        log.info("회원정보수정 - 비밀번호 변경");
+
+        // validation 검증
+        if (results.hasErrors()) {
+            return response.invalidFields(Helper.refineErrors(results));
         }
 
-        userService.updatePassword(principal.getName(), updatePwDto);
-
-        return new ResponseDto(HttpStatus.OK.value(), "비밀번호 수정 성공");
+        return userService.updatePassword(principal.getName(), updatePwDto);
     }
 
     /**
@@ -218,10 +207,10 @@ public class UserController {
      * 작성일 2022-03-29
      **/
     @PostMapping("/validation/email")
-    public ResponseDto validateDuplicateEmail(@RequestBody UserDto userDto) {
+    public ResponseEntity<?> validateDuplicateEmail(@RequestBody UserDto userDto) {
 
-        userService.validateDuplicateEmail(userDto.getEmail());
-        return new ResponseDto(HttpStatus.OK.value(), "이메일 중복 체크 성공");
+        return userService.validateDuplicateEmail(userDto.getEmail());
+//        return new ResponseDto(HttpStatus.OK.value(), "이메일 중복 체크 성공");
     }
 
     /**
@@ -231,9 +220,8 @@ public class UserController {
      * 작성일 2022-03-29
     **/
     @PostMapping("/validation/name")
-    public ResponseDto validateDuplicateUsername(@RequestBody UserDto userDto) {
-        userService.validateDuplicateUser(userDto.getUsername());
-        return new ResponseDto(HttpStatus.OK.value(), "닉네임 중복 체크 성공");
+    public ResponseEntity<?> validateDuplicateUsername(@RequestBody UserDto userDto) {
+        return userService.validateDuplicateUser(userDto.getUsername());
     }
 
 }
