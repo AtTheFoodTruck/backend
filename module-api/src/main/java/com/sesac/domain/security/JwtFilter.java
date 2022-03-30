@@ -36,7 +36,7 @@ public class JwtFilter extends GenericFilterBean {
         String requestURI = httpServletRequest.getRequestURI();
 
         // 유효성 검증
-        if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
+        if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt) && jwtTokenProvider.validateExpiration(jwt)) {
 
             // Redis에 해당 accessToken logout 여부 확인
             String isLogout = (String) redisTemplate.opsForValue().get(jwt);
