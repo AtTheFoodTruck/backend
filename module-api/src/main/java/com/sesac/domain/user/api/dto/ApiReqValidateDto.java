@@ -1,10 +1,16 @@
 package com.sesac.domain.user.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.sesac.domain.user.dto.request.BNoApiRequestDto;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.ToString;
 
+import javax.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,13 +20,28 @@ import java.util.List;
  * @version 1.0.0
  * 작성일 2022/03/29
 **/
-@JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
+@Getter
 public class ApiReqValidateDto {
 
-    private List<BNoApiRequestDto.BNoValidateDto> businesses = new ArrayList<>();  // 사업자 등록 번호
+    private List<InnerDto> businesses = new ArrayList<>();  // 사업자 등록 번호
 
+    @Getter
+    public static class InnerDto {
+        @JsonProperty("b_no")
+        private String bNo;                         // 사업자 등록 번호
+        @JsonProperty("start_dt")
+        private String startDt;                     // 개업일
+        @JsonProperty("p_nm")
+        private String pNm;                         // 대표자사명
+
+        public InnerDto(BNoApiRequestDto.BNoValidateDto bNoValidateDto) {
+            this.bNo = bNoValidateDto.getBNo();
+            this.startDt = bNoValidateDto.getStartDt();
+            this.pNm = bNoValidateDto.getPNm();
+        }
+    }
     @Builder
-    public ApiReqValidateDto(BNoApiRequestDto.BNoValidateDto validateDto) {
-        this.businesses.add(validateDto);
+    public ApiReqValidateDto(BNoApiRequestDto.BNoValidateDto bNoValidateDto) {
+        this.businesses.add(new InnerDto(bNoValidateDto));
     }
 }
