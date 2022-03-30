@@ -11,6 +11,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.firewall.DefaultHttpFirewall;
+import org.springframework.security.web.firewall.HttpFirewall;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
@@ -62,6 +64,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .and()
                     .authorizeRequests()
                     .antMatchers("/**").permitAll()
+//                    .anyRequest().permitAll()
 //                    .antMatchers("/login").permitAll()
 //                    .antMatchers("/managers/status").permitAll() // 사업자등록
                     .anyRequest().authenticated()
