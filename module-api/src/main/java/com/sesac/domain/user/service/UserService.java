@@ -1,12 +1,13 @@
 package com.sesac.domain.user.service;
 
-import com.sesac.domain.common.ResponseDto;
 import com.sesac.domain.common.TokenDto;
 import com.sesac.domain.common.UpdateTokenDto;
 import com.sesac.domain.exception.DuplicateUsernameException;
 import com.sesac.domain.jwt.JwtTokenProvider;
 import com.sesac.domain.redis.RedisService;
+import com.sesac.domain.user.dto.Response;
 import com.sesac.domain.user.dto.request.*;
+import com.sesac.domain.user.dto.response.UserResponseDto;
 import com.sesac.domain.user.entity.Authority;
 import com.sesac.domain.user.entity.User;
 import com.sesac.domain.user.repository.UserRepository;
@@ -50,8 +51,7 @@ public class UserService {
     *
      * @param user*/
     @Transactional
-//    public User signUpUser(RequestUserDto user) {
-    public ResponseEntity<?> signUpUser(JoinUserDto user) {
+    public ResponseEntity<?> signUpUser(UserRequestDto.JoinUserDto user) {
         // 중복회원 검증
 //        validateDuplicateUser(user.getUsername());
 
@@ -75,9 +75,7 @@ public class UserService {
         // User 객체 생성
         User savedUser = userRepository.save(createdUser);
 
-        return response.success(new RsJoinUserDto(savedUser), "회원가입에 성공했습니다.", HttpStatus.CREATED);
-
-//        return new ResponseDto(HttpStatus.OK.value(), new RsJoinUserDto(savedUser));
+        return response.success(new UserResponseDto.JoinUserDto(savedUser), "회원가입에 성공했습니다.", HttpStatus.CREATED);
     }
 
     // TODO 점주에는 가게 정보까지 저장?
@@ -89,7 +87,7 @@ public class UserService {
      *
      * @param manager*/
     @Transactional
-    public User signUpManager(@Valid UserRequestDto.JoinManagerDto manager) {
+    public ResponseEntity<?> signUpManager(@Valid UserRequestDto.JoinManagerDto manager) {
         // 중복 체크
         validateDuplicateUser(manager.getUsername());
         validateDuplicateEmail(manager.getEmail());
@@ -110,8 +108,9 @@ public class UserService {
                 .build();
 
         // Manager 객체 저장
-        return userRepository.save(createdManager);
+        User savedUser = userRepository.save(createdManager);
 
+        return response.success(savedUser, "회원가입에 성공했습니다.", HttpStatus.CREATED);
     }
 
     /**
@@ -132,7 +131,7 @@ public class UserService {
      * 작성일 2022-03-28
     **/
     @Transactional
-    public User updateUsername(String email, UserRequestDto.UpdateNameDto updateNameDto) {
+    public ResponseEntity<?> updateUsername(String email, UserRequestDto.UpdateNameDto updateNameDto) {
         // 요청 유저 정보 조회
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("해당하는 유저를 찾을 수 없습니다."));
 
@@ -140,7 +139,7 @@ public class UserService {
         if (StringUtils.hasText(updateNameDto.getUsername())) {
             user.changeUser(updateNameDto.getUsername());
         }
-        return user;
+        return response.success(user, "닉네임 수정이 완료되었습니다.", HttpStatus.OK);
     }
 
     /**
@@ -150,17 +149,21 @@ public class UserService {
      * 작성일 2022-03-29
     **/
     @Transactional
-    public void updatePassword(String email, UserRequestDto.UpdatePwDto updatePwDto) {
+    public ResponseEntity<?> updatePassword(String email, UserRequestDto.UpdatePwDto updatePwDto) {
         // 요청 유저 정보 조회
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("해당하는 유저를 찾을 수 없습니다."));
 
         // 유저 정보 수정(비밀번호)
         if (StringUtils.hasText(updatePwDto.getCurrentPassword())) {
             if (!passwordEncoder.matches(updatePwDto.getCurrentPassword(), user.getPassword())) {
-                throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
+                return response.fail("비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
             }
         }
+
+        // 비밀번호 업데이트
         user.encodingPassword(passwordEncoder.encode(updatePwDto.getNewPassword()));
+        
+        return response.success("비밀번호 변경이 완료되었습니다.");
     }
 
     /**
@@ -169,12 +172,14 @@ public class UserService {
      * @version 1.0.0
      * 작성일 2022-03-29
      **/
-    public void validateDuplicateEmail(String email) {
+    public ResponseEntity<?> validateDuplicateEmail(String email) {
         int findUsers = userRepository.countByEmail(email);
 
         if (findUsers > 0) {
-            throw new DuplicateUsernameException("이메일이 중복되었습니다");
+            return response.fail("이메일이 중복되었습니다.", HttpStatus.BAD_REQUEST);
         }
+
+        return response.success("이메일 중복 검증되었습니다.");
     }
 
     /**
@@ -183,12 +188,14 @@ public class UserService {
      * @version 1.0.0
      * 작성일 2022-03-29
      **/
-    public void validateDuplicateUser(String username) {
+    public ResponseEntity<?> validateDuplicateUser(String username) {
         int findUsers = userRepository.countByUsername(username);
 
         if (findUsers > 0) {
-            throw new DuplicateUsernameException("닉네임이 중복되었습니다");
+            return response.fail("닉네임이 중복되었습니다", HttpStatus.BAD_REQUEST);
         }
+
+        return response.success("닉네임 중복 검증되었습니다.");
     }
 
     /**
@@ -197,10 +204,11 @@ public class UserService {
      * @version 1.0.0
      * 작성일 2022-03-29
     **/
-    public ResponseDto logout(UserRequestDto.LogoutUserDto logoutDto) {
+    @Transactional
+    public ResponseEntity<?> logout(UserRequestDto.LogoutUserDto logoutDto) {
         // 1. AccessToken 검증
         if (!jwtTokenProvider.validateToken(logoutDto.getAccessToken())) {
-            return new ResponseDto(HttpStatus.BAD_REQUEST.value(), "잘못된 요청입니다.");
+            return response.fail("잘못된 요청입니다.", HttpStatus.BAD_REQUEST);
         }
 
         // 2. AccessToken에서 email을 가져옴
@@ -217,7 +225,7 @@ public class UserService {
         redisTemplate.opsForValue()
                 .set(logoutDto.getAccessToken(), "logout", expiration, TimeUnit.MILLISECONDS);
 
-        return new ResponseDto(HttpStatus.OK.value(), "로그아웃 되었습니다.");
+        return response.success("로그아웃 되었습니다.");
     }
 
     /**
@@ -226,6 +234,7 @@ public class UserService {
      * @version 1.0.0
      * 작성일 2022-03-29
     **/
+    @Transactional
     public ResponseEntity<?> updateRefreshToken(UpdateTokenDto tokenDto) {
 
         // 1. dto에서 토큰 추출
@@ -234,7 +243,7 @@ public class UserService {
 
         // 2. refresh 토큰 validation 검증
         if (!jwtTokenProvider.validateToken(refreshToken)) {
-            throw new IllegalArgumentException("Refresh Token 정보가 유효하지 않습니다.");
+            response.fail("Refresh Token 정보가 유효하지 않습니다.", HttpStatus.BAD_REQUEST);
         }
 
         // 3. Authentication 객체 추출
@@ -245,7 +254,7 @@ public class UserService {
 
         // 5. 로그아웃된 토큰인지 검증
         if (ObjectUtils.isEmpty(refreshTokenFromDB)) {
-            throw new IllegalArgumentException("잘못된 요청입니다.");
+            response.fail("잘못된 요청입니다.", HttpStatus.BAD_REQUEST);
         }
 
         // 6. 새로운 토큰 생성
@@ -255,8 +264,7 @@ public class UserService {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Authorization", "Bearer " + newAccessToken);
 
-        // jwt 토큰 return                           body            header          status
-        return new ResponseEntity<>(new TokenDto(newAccessToken, refreshToken), httpHeaders, HttpStatus.OK);
+        return response.successToken(new TokenDto(newAccessToken, refreshToken), httpHeaders, HttpStatus.OK);
     }
 
     /**

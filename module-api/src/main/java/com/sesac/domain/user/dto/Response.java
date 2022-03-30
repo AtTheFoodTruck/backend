@@ -2,7 +2,7 @@ package com.sesac.domain.user.dto;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -22,9 +22,8 @@ public class Response {
         private String message;
         private Object data;
         private Object error;
-    }
 
-/********************************************************************************************************************/
+    }
     /**
      * 성공 응답 메서드
      * @author jaemin
@@ -39,9 +38,33 @@ public class Response {
                 .message(msg)
                 .error(Collections.emptyList())
                 .build();
-
         return ResponseEntity.ok(body);
     }
+
+    /********************************************************************************************************************/
+    /**
+     * 헤더를 추가해서 성공 응답 반환
+     *     {
+     *         "state" : 200,
+     *         "result" : success,
+     *         "message" : message,
+     *         "data" : [],
+     *         "error" : []
+     *     }
+     * @author jaemin
+     **/
+    public ResponseEntity<?> successToken(Object data, HttpHeaders headers, HttpStatus status) {
+        Body body = Body.builder()
+                .state(status.value())
+                .data(data)
+                .result("success")
+                .message("")
+                .error(Collections.emptyList())
+                .build();
+
+        return new ResponseEntity(body, headers, status);
+    }
+
 
     /**
      * 메세지만 가진 성공 응답 반환 (오버로딩)
