@@ -89,8 +89,12 @@ public class UserService {
     @Transactional
     public ResponseEntity<?> signUpManager(@Valid UserRequestDto.JoinManagerDto manager) {
         // 중복 체크
-        validateDuplicateUser(manager.getUsername());
-        validateDuplicateEmail(manager.getEmail());
+//        validateDuplicateUser(manager.getUsername());
+//        validateDuplicateEmail(manager.getEmail());
+
+        if (userRepository.findByUsername(manager.getUsername()).orElse(null) != null) {
+            return response.fail("이미 가입되어 있는 유저입니다.", HttpStatus.BAD_REQUEST);
+        }
 
         // Manager 권한 생성
         Authority authority = Authority.builder()
@@ -110,7 +114,8 @@ public class UserService {
         // Manager 객체 저장
         User savedUser = userRepository.save(createdManager);
 
-        return response.success(savedUser, "회원가입에 성공했습니다.", HttpStatus.CREATED);
+        // toDTO
+        return response.success(new UserResponseDto.JoinUserDto(savedUser), "회원가입에 성공했습니다.", HttpStatus.CREATED);
     }
 
     /**
