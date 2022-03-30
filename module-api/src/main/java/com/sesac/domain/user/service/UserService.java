@@ -2,7 +2,6 @@ package com.sesac.domain.user.service;
 
 import com.sesac.domain.common.TokenDto;
 import com.sesac.domain.common.UpdateTokenDto;
-import com.sesac.domain.exception.DuplicateUsernameException;
 import com.sesac.domain.jwt.JwtTokenProvider;
 import com.sesac.domain.redis.RedisService;
 import com.sesac.domain.user.dto.Response;
@@ -17,7 +16,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -252,18 +250,19 @@ public class UserService {
 
         // 2. refresh 토큰 validation 검증
         if (!jwtTokenProvider.validateToken(refreshToken)) {
-            response.fail("Refresh Token 정보가 유효하지 않습니다.", HttpStatus.BAD_REQUEST);
+            return response.fail("Refresh Token 정보가 유효하지 않습니다.", HttpStatus.BAD_REQUEST);
         }
 
         // 3. Authentication 객체 추출
         Authentication authentication = jwtTokenProvider.getAuthentication(accessToken);
 
-        // 4. redis에서 Refresh 토큰 value 추출
-        String refreshTokenFromDB = redisService.getRefreshToken(authentication.getName());
+        // 4. redis 에서 Refresh 토큰 value 추출
+        String refreshTokenFromDB =
+                redisService.getRefreshToken(authentication.getName());
 
-        // 5. 로그아웃된 토큰인지 검증
+        // 5. 시간이 만료되어 db 에 없거나, 로그아웃 된 토큰인지 검증
         if (ObjectUtils.isEmpty(refreshTokenFromDB)) {
-            response.fail("잘못된 요청입니다.", HttpStatus.BAD_REQUEST);
+            return response.fail("잘못된 요청입니다.", HttpStatus.BAD_REQUEST);
         }
 
         // 6. 새로운 토큰 생성

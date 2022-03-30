@@ -1,11 +1,9 @@
 package com.sesac.domain.user.controller;
 
-import com.sesac.domain.common.ResponseDto;
 import com.sesac.domain.common.TokenDto;
 import com.sesac.domain.common.UpdateTokenDto;
 import com.sesac.domain.user.dto.*;
 import com.sesac.domain.user.dto.request.*;
-import com.sesac.domain.user.entity.User;
 import com.sesac.domain.user.service.UserService;
 import com.sesac.domain.jwt.JwtTokenProvider;
 import com.sesac.domain.redis.RedisService;
@@ -143,7 +141,7 @@ public class UserController {
      * @version 1.0.0
      * 작성일 2022-03-29
     **/
-    @PostMapping("/refresh")
+    @PostMapping("/users/refresh")
     public ResponseEntity<?> updateRefreshToken(@Valid @RequestBody UpdateTokenDto updateTokenDto, BindingResult results) {
 
         log.info("Access Token 갱신");
@@ -154,7 +152,6 @@ public class UserController {
         }
 
         return userService.updateRefreshToken(updateTokenDto);
-
     }
 
     /**

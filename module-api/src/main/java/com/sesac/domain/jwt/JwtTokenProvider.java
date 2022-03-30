@@ -67,7 +67,7 @@ public class JwtTokenProvider implements Serializable, InitializingBean {
     public Map<String, Object> getUserParseInfo(String token) {
         Claims claims = getAllClaimsFromToken(token);
         Map<String, Object> result = new HashMap<>();
-        result.put("email", claims.getSubject()); //expeted : getSubject("email"),
+        result.put("email", claims.getSubject()); // expected : getSubject("email"),
         result.put(AUTHORITIES_KEY, claims.get(AUTHORITIES_KEY));
 
         log.info("권한이 담긴 result  = {}", result);
@@ -133,7 +133,6 @@ public class JwtTokenProvider implements Serializable, InitializingBean {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
-
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("잘못된 JWT 서명입니다.");
         } catch (ExpiredJwtException e) {
