@@ -101,7 +101,6 @@ public class UserController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         // 생성된 객체로 TokenProvider.createToken 메서드를 통해 jwt토큰을 생성
-//        String jwt = jwtTokenProvider.createToken(authentication);
         String accessToken = jwtTokenProvider.createToken(authentication, false);
         String refreshToken = jwtTokenProvider.createToken(authentication, true);
 
@@ -223,5 +222,4 @@ public class UserController {
     public ResponseEntity<?> validateDuplicateUsername(@RequestBody UserDto userDto) {
         return userService.validateDuplicateUser(userDto.getUsername());
     }
-
 }
