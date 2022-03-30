@@ -98,5 +98,20 @@ public class TokenProvider implements InitializingBean {
         return false;
     }
 
+    /**
+     * 토큰 유효성, 만료시간 체크
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-31
+     **/
+    public boolean validateExpiration(String token) {
+        try {
+            Jws<Claims> claimsJws = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return !claimsJws.getBody().getExpiration().before(new Date());
+        }catch (ExpiredJwtException e) {
+            log.info(e.getMessage());
+            return false;
+        }
+    }
 
 }

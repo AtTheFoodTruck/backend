@@ -1,16 +1,21 @@
 package com.sesac.domain.handler;
 
-import com.sesac.domain.common.ResponseDto;
+import com.sesac.domain.user.dto.Response;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestController;
 
+@RequiredArgsConstructor
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    private final Response response;
+
     @ExceptionHandler(value=Exception.class)
-    public ResponseDto<String> handleArgumentException(Exception e) {
-        return new ResponseDto<String>(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()); // 500
+    public ResponseEntity<?> handleArgumentException(Exception e) {
+        return response.fail(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
 }
