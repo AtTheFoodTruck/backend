@@ -28,7 +28,7 @@ spring:
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/user-service/logins, /user-service/users/join, /user-service/managers/join /user-service/validation/**
+            - Path=/user-service/logins, /user-service/users/join, /user-service/managers/join, /user-service/validation/**
             - Method=POST
           filters:
             - RemoveRequestHeader=Cookie
@@ -49,8 +49,8 @@ spring:
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/user-service/name,/user-service/password,/user-service/mypage
-            - Method=PATCH,DELETE
+            - Path=/user-service/name,/user-service/password,/user-service/mypage,/user-service/users/logout
+            - Method=PATCH,DELETE,POST
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
@@ -68,20 +68,13 @@ spring:
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
             - name: JwtAuthentication
               args:
-                roles: ROLE_MANAGER
-
-  # redis 설정
-#  redis:
-#    lettuce:
-#      pool:
-#        max-active: 10
-#        max-idle: 10
-#        min-idle: 2
-#    port: 6379  # default: 6379
-#    host: localhost  # default: localhost
+                roles: ROLE_MANAGER, ROLE_USER
 
 # gw process 추적
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG
     reactor.netty.http.client: DEBUG
+
+jwt:
+  secret: c2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQtc2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQK

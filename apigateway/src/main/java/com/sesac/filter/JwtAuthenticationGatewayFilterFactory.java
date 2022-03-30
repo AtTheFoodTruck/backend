@@ -1,7 +1,8 @@
 package com.sesac.filter;
 
 
-import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -14,35 +15,27 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import java.security.Key;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Order(-2)
 @Component
 public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilterFactory<JwtAuthenticationGatewayFilterFactory.Config> {
 
-//    @Autowired
-//    private JwtTokenProvider jwtTokenProvider;
     @Autowired
     private TokenProvider tokenProvider;
-    private Key key;
-
-    public JwtAuthenticationGatewayFilterFactory() {
-        super(Config.class);
-    }
 
     @Getter
     @AllArgsConstructor
     public static class Config {
-        private List<String> roles = new ArrayList<String>();
+        private List<String> roles;
+    }
+
+    public JwtAuthenticationGatewayFilterFactory() {
+        super(Config.class);
 
     }
 
@@ -56,6 +49,7 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
     @Override
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
+            log.info("into apply method");
             ServerHttpRequest request = exchange.getRequest();
 
             // request header 에 Authorization 가 없는 경우
@@ -133,10 +127,10 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
 //            return false;
 //        }
 //        return true;
-        String role = (String) tokenProvider.getUserParseInfo(token).get("role"); // ROLE_USer, ROLE_MANAGER, ROLE_ADMIN
+        String role = (String) tokenProvider.getUserParseInfo(token).get("auth"); // ROLE_USer, ROLE_MANAGER, ROLE_ADMIN
         log.info("role of request user: " + role);
 
-        if( !configs.getRoles().stream()
+        if(!configs.getRoles().stream()
                 .anyMatch(s -> s.equals(role))){
              return false;
         }

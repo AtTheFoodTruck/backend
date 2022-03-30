@@ -101,7 +101,6 @@ public class UserController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         // 생성된 객체로 TokenProvider.createToken 메서드를 통해 jwt토큰을 생성
-//        String jwt = jwtTokenProvider.createToken(authentication);
         String accessToken = jwtTokenProvider.createToken(authentication, false);
         String refreshToken = jwtTokenProvider.createToken(authentication, true);
 
@@ -124,7 +123,7 @@ public class UserController {
      * @version 1.0.0
      * 작성일 2022-03-29
     **/
-    @PostMapping("/logout")
+    @PostMapping("/users/logout")
     public ResponseEntity<?> logout(@Valid @RequestBody UserRequestDto.LogoutUserDto logoutDto, BindingResult results) {
 
         log.info("로그아웃");
@@ -223,5 +222,4 @@ public class UserController {
     public ResponseEntity<?> validateDuplicateUsername(@RequestBody UserDto userDto) {
         return userService.validateDuplicateUser(userDto.getUsername());
     }
-
 }
