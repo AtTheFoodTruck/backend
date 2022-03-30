@@ -96,9 +96,6 @@ public class UserRequestDto {
 
         @NotBlank(message = "잘못된 요청입니다.")
         private String accessToken;
-
-        @NotBlank(message = "잘못된 요청입니다.")
-        private String refreshToken;
     }
 
     /**
@@ -108,9 +105,9 @@ public class UserRequestDto {
      * 작성일 2022/03/30
      **/
     @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
-    @Getter
+    @Getter @Setter
     @AllArgsConstructor
-    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor
     public static class UpdateNameDto {
 
         @NotBlank(message = "닉네임을 입력해주세요")
@@ -126,7 +123,7 @@ public class UserRequestDto {
     @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
     @Getter
     @AllArgsConstructor
-    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor
     public static class UpdatePwDto {
 
         @NotBlank(message = "현재 비밀번호를 입력해주세요")

@@ -13,7 +13,7 @@ public class UserResponseDto {
      * @author jaemin
      * @version 1.0.0
      * 작성일 2022/03/30
-    **/
+     **/
     @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
     @Data
     @AllArgsConstructor

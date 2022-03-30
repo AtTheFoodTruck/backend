@@ -133,16 +133,36 @@ public class JwtTokenProvider implements Serializable, InitializingBean {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
+
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("잘못된 JWT 서명입니다.");
+            return false;
         } catch (ExpiredJwtException e) {
             log.info("만료된 JWT 토큰입니다.");
+            return false;
         } catch (UnsupportedJwtException e) {
             log.info("지원되지 않는 JWT 토큰입니다.");
+            return false;
         } catch (IllegalArgumentException e) {
             log.info("JWT 토큰이 잘못되었습니다.");
+            return false;
         }
-        return false;
+    }
+
+    /**
+     * 토큰 유효성, 만료시간 체크
+     * @author jaemin
+     * @version 1.0.0
+     * 작성일 2022-03-31
+     **/
+    public boolean validateExpiration(String token) {
+        try {
+            Jws<Claims> claimsJws = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return !claimsJws.getBody().getExpiration().before(new Date());
+        }catch (ExpiredJwtException e) {
+            log.info(e.getMessage());
+            return false;
+        }
     }
 
     /**
@@ -160,5 +180,4 @@ public class JwtTokenProvider implements Serializable, InitializingBean {
         Long now = new Date().getTime();
         return (expiration.getTime() - now);
     }
-
 }
