@@ -1,4 +1,4 @@
-package com.sesac.domain.user.dto;
+package com.sesac.domain.user.dto.request;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -13,10 +13,10 @@ import javax.validation.constraints.NotBlank;
 @Builder
 @AllArgsConstructor
 @Data
-public class RequestUserDto {
+public class JoinManagerDto {
 
-    @Email(message = "이메일 형식을 지켜주세요")
     @NotBlank(message = "이메일 정보는 필수입니다.")
+    @Email
     private String email;
 
     @NotBlank(message = "닉네임 정보는 필수입니다.")
@@ -24,6 +24,9 @@ public class RequestUserDto {
 
     @NotBlank(message = "비밀번호는 필수입니다.")
     private String password;
+
+    @NotBlank(message = "사업자 등록번호는 필수입니다.")
+    private String bNo;
 
     @NotBlank(message = "핸드폰 정보는 필수입니다.")
     private String phoneNum;

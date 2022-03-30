@@ -67,7 +67,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 //                    .anyRequest().permitAll()
 //                    .antMatchers("/login").permitAll()
 //                    .antMatchers("/managers/status").permitAll() // 사업자등록
-//                    .anyRequest().authenticated()
+                    .anyRequest().authenticated()
 
                 // 로그인
                 .and()

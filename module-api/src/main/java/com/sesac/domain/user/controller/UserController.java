@@ -4,6 +4,12 @@ import com.sesac.domain.common.ResponseDto;
 import com.sesac.domain.common.TokenDto;
 import com.sesac.domain.common.UpdateTokenDto;
 import com.sesac.domain.user.dto.*;
+import com.sesac.domain.user.dto.request.JoinManagerDto;
+import com.sesac.domain.user.dto.request.LoginUserDto;
+import com.sesac.domain.user.dto.request.LogoutUserDto;
+import com.sesac.domain.user.dto.request.UpdatePwDto;
+import com.sesac.domain.user.dto.response.JoinUserDto;
+import com.sesac.domain.user.dto.request.UpdateNameDto;
 import com.sesac.domain.user.entity.User;
 import com.sesac.domain.user.service.UserService;
 import com.sesac.domain.jwt.JwtTokenProvider;
@@ -48,7 +54,7 @@ public class UserController {
      * 작성일 2022-03-26
     **/
     @PostMapping("/users/join")
-    public ResponseDto signUpUser(@Valid @RequestBody RequestUserDto userDto, BindingResult result) {
+    public ResponseDto signUpUser(@Valid @RequestBody com.sesac.domain.user.dto.request.JoinUserDto userDto, BindingResult result) {
 
         // validation 검증
         String errorMessage = result.getFieldErrors().stream()
@@ -59,9 +65,9 @@ public class UserController {
             return new ResponseDto(HttpStatus.BAD_REQUEST.value(), errorMessage);
         }
 
-        User joinUser = userService.signUpUser(userDto);
+        return new ResponseDto(HttpStatus.CREATED.value(), userService.signUpUser(userDto));
 
-        return new ResponseDto(HttpStatus.CREATED.value(), new ResponseUserDto(joinUser));
+//        return new ResponseDto(HttpStatus.CREATED.value(), new ResponseUserDto(joinUser));
     }
     
     /**
@@ -71,7 +77,7 @@ public class UserController {
      * 작성일 2022-03-29
     **/
     @PostMapping("/managers/join")
-    public ResponseDto signUpManager(@Valid @RequestBody RequestManagerDto managerDto, BindingResult result) {
+    public ResponseDto signUpManager(@Valid @RequestBody JoinManagerDto managerDto, BindingResult result) {
 
         // validation 검증
         String errorMessage = result.getFieldErrors().stream()
@@ -84,7 +90,7 @@ public class UserController {
 
         User joinManager = userService.signUpManager(managerDto);
 
-        return new ResponseDto(HttpStatus.CREATED.value(), new ResponseUserDto(joinManager));
+        return new ResponseDto(HttpStatus.CREATED.value(), new JoinUserDto(joinManager));
     }
 
     /**
@@ -121,7 +127,7 @@ public class UserController {
         httpHeaders.add("Authorization", "Bearer " + accessToken);
 
         // jwt토큰 return                           body            header          status
-        return new ResponseEntity<>(new TokenDto(accessToken), httpHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(new TokenDto(accessToken, refreshToken), httpHeaders, HttpStatus.OK);
     }
 
     /**

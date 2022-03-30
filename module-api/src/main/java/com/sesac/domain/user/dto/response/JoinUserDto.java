@@ -1,4 +1,4 @@
-package com.sesac.domain.user.dto;
+package com.sesac.domain.user.dto.response;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -11,7 +11,7 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 @Data
-public class ResponseUserDto {
+public class JoinUserDto {
 
     private String username;
     private String email;
@@ -20,7 +20,7 @@ public class ResponseUserDto {
     private String bNo;
 
     // Entity -> Dto
-    public ResponseUserDto(User joinMember) {
+    public JoinUserDto(User joinMember) {
         this.username = joinMember.getUsername();
         this.email = joinMember.getEmail();
         this.phoneNum = joinMember.getPhoneNum();

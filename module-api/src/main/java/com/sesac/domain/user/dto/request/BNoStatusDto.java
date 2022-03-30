@@ -1,8 +1,6 @@
-package com.sesac.domain.user.dto;
+package com.sesac.domain.user.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,7 +18,7 @@ import javax.validation.constraints.NotBlank;
 @Getter @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RequestStatusDto {
+public class BNoStatusDto {
 
     @NotBlank(message = "사업자 등록번호는 필수입니다.")
     @JsonProperty("b_no")
