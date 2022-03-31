@@ -266,6 +266,8 @@ public class UserService {
             response.fail("잘못된 요청입니다.", HttpStatus.BAD_REQUEST);
         }
 
+        // 받아온 토큰을 blacklist처리
+
         // 6. 새로운 토큰 생성
         String newAccessToken = jwtTokenProvider.createToken(authentication, false);
 

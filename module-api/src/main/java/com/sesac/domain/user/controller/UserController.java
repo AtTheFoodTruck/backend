@@ -9,8 +9,10 @@ import com.sesac.domain.user.entity.User;
 import com.sesac.domain.user.service.UserService;
 import com.sesac.domain.jwt.JwtTokenProvider;
 import com.sesac.domain.redis.RedisService;
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,11 +36,22 @@ public class UserController {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final RedisService redisService;
     private final Response response;
+    private final Environment env;
 
 
     @GetMapping("/welcome")
     public String welcome() {
         return "welcome";
+    }
+
+    @GetMapping("/health_check")
+    @Timed(value="users.status", longTask = true)
+    public String status() {
+        return String.format("It's Working in User Service"
+                + ", port(local.server.port)=" + env.getProperty("local.server.port")
+                + ", port(server.port)=" + env.getProperty("server.port")
+                + ", message=" + env.getProperty("greeting.message")
+                + ", token secret=" + env.getProperty("jwt.secret"));
     }
 
     /**

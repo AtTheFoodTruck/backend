@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.core.annotation.Order;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -39,13 +40,12 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
 
     }
 
-
     /**
      * Jwt token 인증 filter
      * @author jjaen
      * @version 1.0.0
      * 작성일 2022/03/27
-    **/
+     **/
     @Override
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {

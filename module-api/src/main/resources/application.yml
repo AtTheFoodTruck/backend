@@ -1,5 +1,5 @@
 server:
-  port: 8888
+  port: 8887
 
 spring:
   datasource:
@@ -33,5 +33,14 @@ eureka:
 
 jwt:
   secret: c2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQtc2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQK
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: beans, health, busrefresh, refresh
+
+greeting:
+  message: Welcome to the Simple E-commerce.
 
 #debug: true

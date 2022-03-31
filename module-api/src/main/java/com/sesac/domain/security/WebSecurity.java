@@ -63,6 +63,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 // request 처리
                 .and()
                     .authorizeRequests()
+                    .antMatchers("/actuator/**").permitAll()
                     .antMatchers("/**").permitAll()
 //                    .anyRequest().permitAll()
 //                    .antMatchers("/login").permitAll()

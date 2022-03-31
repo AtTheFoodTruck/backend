@@ -17,6 +17,14 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+    // config
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
+
+    // bootstrap
+    implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+
+    // actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 dependencyManagement {
