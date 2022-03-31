@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Getter
 @EntityListeners(AuditingEntityListener.class)
 @MappedSuperclass
-public class BaseEntity {
+public abstract class BaseEntity {
 
     @CreatedDate
     @Column(updatable = false)
@@ -24,10 +24,10 @@ public class BaseEntity {
     @LastModifiedDate
     private LocalDateTime modifiedDate;
 
-    @CreatedBy
-    @Column(updatable = false)
-    private String createdBy;
-
-    @LastModifiedBy
-    private String modifiedBy;
+//    @CreatedBy
+//    @Column(updatable = false)
+//    private String createdBy;
+//
+//    @LastModifiedBy
+//    private String modifiedBy;
 }

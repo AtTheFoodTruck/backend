@@ -1,9 +1,8 @@
 package com.sesac.domain.item.entity;
 
 import com.sesac.domain.common.BaseEntity;
-import com.sesac.domain.member.entity.Member;
-import lombok.Getter;
-import lombok.Setter;
+import com.sesac.domain.user.entity.User;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -12,7 +11,10 @@ import java.util.List;
 
 import static javax.persistence.FetchType.LAZY;
 
-@Getter @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 @Entity
 public class Cart extends BaseEntity {
 
@@ -20,9 +22,9 @@ public class Cart extends BaseEntity {
     @Column(name = "cart_id")
     private Long id;
 
-    // Member
+    // User
     @OneToOne(mappedBy = "cart", fetch = LAZY)
-    private Member member;
+    private User user;
 
     // CartItem
     @OneToMany(mappedBy = "cart")

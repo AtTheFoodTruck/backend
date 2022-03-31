@@ -2,18 +2,17 @@ package com.sesac.domain.order.entity;
 
 import com.sesac.domain.common.BaseEntity;
 import com.sesac.domain.item.entity.Store;
-import com.sesac.domain.member.entity.Member;
-import lombok.Getter;
-import lombok.Setter;
+import com.sesac.domain.user.entity.User;
+import lombok.*;
 
 import javax.persistence.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static javax.persistence.FetchType.LAZY;
 
-@Getter @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 @Entity
 public class Review extends BaseEntity {
 
@@ -27,10 +26,10 @@ public class Review extends BaseEntity {
     @OneToOne(mappedBy = "review", fetch = LAZY)
     private Order order;
 
-    // Member
+    // User
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "user_id")
+    private User user;
 
     // Store
     @ManyToOne(fetch = LAZY)
