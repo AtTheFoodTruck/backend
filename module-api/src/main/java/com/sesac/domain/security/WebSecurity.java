@@ -71,9 +71,9 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                     .anyRequest().authenticated()
 
                 // 로그인
-                .and()
-                    .formLogin()
-                    .loginPage("/login")
+//                .and()
+//                    .formLogin()
+//                    .loginPage("/login")
 
                 // JwtSecurityConfig filter에 추가한걸 적용
                 .and()

@@ -44,3 +44,13 @@ greeting:
   message: Welcome to the Simple E-commerce.
 
 #debug: true
+
+# redis 설정
+redis:
+  lettuce:
+    pool:
+      max-active: 10
+      max-idle: 10
+      min-idle: 2
+  port: 6379  # default: 6379
+  host: localhost  # default: localhost

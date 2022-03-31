@@ -38,7 +38,7 @@ spring:
           uri: lb://USER-SERVICE
           predicates:
             - Path=/user-service/users/**
-            - Method=GET,PATCH,DELETE
+            - Method=GET,PATCH,DELETE,POST
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
@@ -68,7 +68,6 @@ spring:
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
             - name: JwtAuthentication
               args:
-                roles: ROLE_MANAGER, ROLE_USER
         # config 서비스
         - id: user-service
           uri: lb://USER-SERVICE
@@ -87,6 +86,7 @@ spring:
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+                roles: ROLE_MANAGER
 
 # gw process 추적
 logging:

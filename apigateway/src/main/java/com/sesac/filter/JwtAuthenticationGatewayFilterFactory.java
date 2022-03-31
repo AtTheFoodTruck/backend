@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -56,14 +57,13 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
             if (!containsAuthorization(request)) {
                 return onError(exchange, "No Authorization header", HttpStatus.BAD_REQUEST);
             }
-
             // 토큰 value 추출
             String token = extractToken(request);  // "Bearer " 이후 String
             log.info("JWT token: " + token);
 
             // JWT token 이 유효한지 확인
-            if (!tokenProvider.validateToken(token)) {
-                return onError(exchange, "Invalid Authorization header", HttpStatus.UNAUTHORIZED);
+            if (tokenProvider.validateExpiration(token) || !tokenProvider.validateToken(token)) {
+                return onError(exchange, "Invalid Authorization header", HttpStatus.BAD_REQUEST);
             }
 
             // 해당 request 가 허용된 권한이 JWT token 의 user role 을 포함하고 있는지 확인
